@@ -8,7 +8,7 @@
  * 4. 고위험 시 추가 검증 화면으로 이동
  */
 
-import React, { useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { analyzeText } from "../services/apiClient";
 import { useBehaviorTracker } from "../utils/behaviorTracker";
 import type { AnalyzeResponse, RiskLevel } from "../types/api";

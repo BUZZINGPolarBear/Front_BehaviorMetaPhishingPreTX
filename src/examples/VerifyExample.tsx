@@ -8,7 +8,7 @@
  * 4. 최종 판단 결과 표시
  */
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { verifyTransaction } from "../services/apiClient";
 import { useScreenshot } from "../hooks/useScreenshot";
 import type { VerifyChecklist, VerifyResponse, NextAction } from "../types/api";

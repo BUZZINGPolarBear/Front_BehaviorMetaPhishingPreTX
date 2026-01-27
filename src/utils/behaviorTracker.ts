@@ -77,16 +77,17 @@ export class BehaviorTracker {
   /**
    * 키 입력 이벤트 핸들러
    */
-  private handleKeydown = (event: KeyboardEvent): void => {
+  private handleKeydown = (event: Event): void => {
+    const keyboardEvent = event as KeyboardEvent;
     const now = Date.now();
 
     // 백스페이스/Delete 감지
-    if (event.key === "Backspace" || event.key === "Delete") {
+    if (keyboardEvent.key === "Backspace" || keyboardEvent.key === "Delete") {
       this.backspaceCount++;
     }
 
     // 타이핑 간격 기록 (특수키 제외)
-    if (event.key.length === 1) {
+    if (keyboardEvent.key.length === 1) {
       if (this.lastTypingTime > 0) {
         const interval = now - this.lastTypingTime;
         this.typingIntervals.push(interval);
@@ -95,7 +96,7 @@ export class BehaviorTracker {
     }
 
     // Tab 키로 필드 이동 감지
-    if (event.key === "Tab") {
+    if (keyboardEvent.key === "Tab") {
       this.fieldHops++;
     }
 

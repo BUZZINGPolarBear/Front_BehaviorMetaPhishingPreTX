@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { TransferScreen } from './components/TransferScreen';
 import { AnalyzeExample } from './examples/AnalyzeExample';
 import { VerifyExample } from './examples/VerifyExample';

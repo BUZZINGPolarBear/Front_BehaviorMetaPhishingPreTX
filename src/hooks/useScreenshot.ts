@@ -165,7 +165,7 @@ export function useScreenshot(): UseScreenshotReturn {
  * }
  * ```
  */
-export async function uploadScreenshotToBackend(file: File): Promise<string> {
+export async function uploadScreenshotToBackend(_file: File): Promise<string> {
   // TODO: 백엔드 업로드 API 구현 시 활성화
   throw new Error("백엔드 업로드 기능은 아직 구현되지 않았습니다.");
 

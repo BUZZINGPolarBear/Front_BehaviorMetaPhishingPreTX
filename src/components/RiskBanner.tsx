@@ -3,7 +3,7 @@
  * 송금창 위에 자연스럽게 표시되는 침착한 보안 알림
  */
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import type { AnalyzeResponse, RiskLevel } from '../types/api';
 import './RiskBanner.css';
 
@@ -13,7 +13,7 @@ interface RiskBannerProps {
 
 export function RiskBanner({ analysis }: RiskBannerProps) {
   const [isExpanded, setIsExpanded] = useState(false);
-  const { riskLevel, riskScore, reasons, recommendations } = analysis;
+  const { riskLevel, reasons, recommendations } = analysis;
 
   // 위험도별 아이콘
   const getIcon = (level: RiskLevel) => {

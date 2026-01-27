@@ -3,11 +3,11 @@
  * 메시지 붙여넣기 시 자동 파싱 및 위험도 분석
  */
 
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { useBehaviorTracker } from '../utils/behaviorTracker';
 import { analyzeText } from '../services/apiClient';
-import { parseTransferMessage, formatParsedInfo, isValidParsedInfo } from '../utils/messageParser';
-import type { AnalyzeResponse, RiskLevel } from '../types/api';
+import { parseTransferMessage } from '../utils/messageParser';
+import type { AnalyzeResponse } from '../types/api';
 import { RiskBanner } from './RiskBanner';
 import './TransferScreen.css';
 
@@ -117,12 +117,6 @@ export function TransferScreen() {
       account: contact.account,
     });
     setStep('amount');
-  };
-
-  // 금액 입력
-  const handleAmountChange = (value: string) => {
-    const numericValue = value.replace(/[^0-9]/g, '');
-    setAmount(numericValue);
   };
 
   // 빠른 금액 버튼

@@ -285,7 +285,7 @@ export function verifyLocally(request: VerifyRequest): VerifyResponse {
   let positiveCount = 0;
   let totalCount = 0;
 
-  for (const [key, value] of Object.entries(checklist)) {
+  for (const value of Object.values(checklist)) {
     if (typeof value === "boolean") {
       totalCount++;
       if (value === true) {

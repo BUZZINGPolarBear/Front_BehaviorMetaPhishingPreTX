@@ -13,11 +13,6 @@ import type {
 import { analyzeLocally, verifyLocally } from "../utils/riskAnalyzer";
 
 /**
- * 로컬 분석 모드 (백엔드 없이 프론트엔드에서 처리)
- */
-const USE_LOCAL_ANALYSIS = true;
-
-/**
  * 로컬 분석 모드에서는 API 에러가 발생하지 않음
  * 향후 Claude API 연동 시 사용
  */
