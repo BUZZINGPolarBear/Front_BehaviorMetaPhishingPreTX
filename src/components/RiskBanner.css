@@ -1,0 +1,159 @@
+/**
+ * 위험도 배너 스타일
+ * Calm Security 원칙 - 불안 유발하지 않고 명확하게
+ */
+
+.risk-banner {
+  margin: var(--space-4);
+  border-radius: 16px;
+  overflow: hidden;
+  transition: all var(--duration-base) var(--ease-out);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  animation: slideDown var(--duration-base) var(--ease-out);
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 위험도별 색상 */
+.risk-banner.risk-low {
+  background: linear-gradient(135deg, #D1FAE5, #A7F3D0);
+  border: 1.5px solid #10B981;
+}
+
+.risk-banner.risk-medium {
+  background: linear-gradient(135deg, #FEF3C7, #FDE68A);
+  border: 1.5px solid #F59E0B;
+}
+
+.risk-banner.risk-high {
+  background: linear-gradient(135deg, #FEE2E2, #FECACA);
+  border: 1.5px solid #EF4444;
+}
+
+/* 메인 영역 */
+.risk-banner-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4);
+  cursor: pointer;
+  user-select: none;
+}
+
+.risk-indicator {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.risk-icon {
+  font-size: 24px;
+  font-weight: var(--font-bold);
+}
+
+.risk-low .risk-icon {
+  color: #059669;
+}
+
+.risk-medium .risk-icon {
+  color: #D97706;
+}
+
+.risk-high .risk-icon {
+  color: #DC2626;
+}
+
+.risk-message {
+  font-size: var(--text-base);
+  font-weight: var(--font-semibold);
+  color: var(--gray-900);
+}
+
+.risk-toggle {
+  font-size: var(--text-sm);
+  color: var(--gray-700);
+  font-weight: var(--font-medium);
+}
+
+/* 상세 정보 */
+.risk-banner-details {
+  padding: 0 var(--space-4) var(--space-4);
+  animation: fadeIn var(--duration-base) var(--ease-out);
+}
+
+.risk-section {
+  margin-top: var(--space-4);
+  padding: var(--space-4);
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 12px;
+}
+
+.risk-section-title {
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--gray-700);
+  margin-bottom: var(--space-2);
+}
+
+.risk-reasons,
+.risk-recommendations {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.risk-reason-item,
+.risk-recommendation-item {
+  font-size: var(--text-sm);
+  color: var(--gray-700);
+  padding: var(--space-2) 0;
+  padding-left: var(--space-4);
+  position: relative;
+  line-height: var(--leading-relaxed);
+}
+
+.risk-reason-item::before,
+.risk-recommendation-item::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  font-weight: var(--font-bold);
+  color: var(--gray-500);
+}
+
+/* 추가 검증 버튼 */
+.verify-button {
+  width: 100%;
+  margin-top: var(--space-4);
+  padding: var(--space-4);
+  border: none;
+  border-radius: 12px;
+  background: white;
+  font-size: var(--text-base);
+  font-weight: var(--font-semibold);
+  color: var(--primary-indigo);
+  cursor: pointer;
+  transition: all var(--duration-base) var(--ease-out);
+  min-height: 48px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.verify-button:hover {
+  background: var(--gray-50);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* 펼쳐진 상태 */
+.risk-banner.expanded {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}

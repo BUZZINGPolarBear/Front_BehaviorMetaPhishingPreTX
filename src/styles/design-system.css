@@ -1,0 +1,235 @@
+/**
+ * 디자인 시스템 - CSS Variables
+ * Design/DesignGuide.md 기반
+ */
+
+:root {
+  /* Primary Colors */
+  --primary-indigo: #6366f1;
+  --primary-purple: #8b5cf6;
+  --primary-pink: #ec4899;
+
+  /* Semantic Colors */
+  --success: #10b981;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  --info: #3b82f6;
+
+  /* Neutral Colors */
+  --gray-900: #111827;
+  --gray-700: #374151;
+  --gray-500: #6b7280;
+  --gray-300: #d1d5db;
+  --gray-100: #f3f4f6;
+  --gray-50: #f9fafb;
+
+  /* Background Gradients */
+  --gradient-main: linear-gradient(to right, #6366f1, #8b5cf6);
+  --gradient-card: linear-gradient(to bottom right, #f0f2ff, #f5f3ff);
+  --gradient-warm: linear-gradient(to bottom right, #fef3c7, #fde68a);
+
+  /* Typography */
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-base: 16px;
+  --text-lg: 18px;
+  --text-xl: 20px;
+  --text-2xl: 24px;
+  --text-3xl: 30px;
+
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+
+  --leading-tight: 1.25;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.75;
+
+  /* Spacing (8px Grid) */
+  --space-0: 0px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* Animations */
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+
+  --duration-fast: 150ms;
+  --duration-base: 200ms;
+  --duration-slow: 300ms;
+}
+
+/* Card Components */
+.card-base {
+  background: white;
+  border-radius: 16px;
+  padding: var(--space-5);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.card-gradient {
+  background: var(--gradient-card);
+  border-radius: 16px;
+  padding: var(--space-5);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.1);
+}
+
+.card-clickable {
+  cursor: pointer;
+  transition: all var(--duration-base) var(--ease-out);
+}
+
+.card-clickable:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+/* Button Components */
+.btn-primary {
+  background: var(--gradient-main);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 14px 24px;
+  font-weight: var(--font-semibold);
+  font-size: var(--text-base);
+  min-height: 48px;
+  cursor: pointer;
+  transition: all var(--duration-base) var(--ease-out);
+}
+
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: white;
+  color: var(--primary-indigo);
+  border: 1.5px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 14px 24px;
+  font-weight: var(--font-semibold);
+  font-size: var(--text-base);
+  min-height: 48px;
+  cursor: pointer;
+  transition: all var(--duration-base) var(--ease-out);
+}
+
+.btn-secondary:hover {
+  background: var(--gray-50);
+  border-color: var(--primary-indigo);
+}
+
+.btn-text {
+  background: none;
+  border: none;
+  color: var(--primary-indigo);
+  font-weight: var(--font-semibold);
+  padding: var(--space-2);
+  min-height: 44px;
+  cursor: pointer;
+}
+
+/* Input Fields */
+.input-field {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 12px;
+  font-size: var(--text-base);
+  background: white;
+  min-height: 48px;
+  transition: all var(--duration-base) var(--ease-out);
+  font-family: inherit;
+}
+
+.input-field:focus {
+  border-color: var(--primary-indigo);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.input-label {
+  display: block;
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--gray-700);
+  margin-bottom: var(--space-2);
+}
+
+/* List Items */
+.list-item {
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--gray-100);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 64px;
+}
+
+.list-item-borderless {
+  padding: 12px 16px;
+  border-radius: 12px;
+  margin-bottom: var(--space-2);
+  background: var(--gray-50);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.fade-in {
+  animation: fadeIn var(--duration-base) var(--ease-out);
+}
+
+.slide-up {
+  animation: slideUp var(--duration-slow) var(--ease-out);
+}
+
+.scale-in {
+  animation: scaleIn var(--duration-base) var(--ease-out);
+}
