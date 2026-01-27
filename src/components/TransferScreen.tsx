@@ -7,6 +7,7 @@ import { useState, useRef } from 'react';
 import { useBehaviorTracker } from '../utils/behaviorTracker';
 import { analyzeText } from '../services/apiClient';
 import { parseTransferMessage } from '../utils/messageParser';
+import { SAMPLE_MESSAGES, type SampleMessage } from '../data/sampleMessages';
 import type { AnalyzeResponse } from '../types/api';
 import { RiskBanner } from './RiskBanner';
 import './TransferScreen.css';
@@ -36,15 +37,19 @@ export function TransferScreen() {
   const [originalMessage, setOriginalMessage] = useState(''); // 붙여넣은 원본 메시지
   const [riskAnalysis, setRiskAnalysis] = useState<AnalyzeResponse | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [showSamples, setShowSamples] = useState(true); // 샘플 메시지 표시 여부
 
   const accountInputRef = useRef<HTMLInputElement>(null);
   const { getSignals } = useBehaviorTracker(accountInputRef);
 
-  // 계좌번호 필드에 붙여넣기 감지
-  const handleAccountPaste = async (e: React.ClipboardEvent<HTMLInputElement>) => {
-    e.preventDefault(); // 기본 붙여넣기 동작 방지
+  // 샘플 메시지 적용
+  const handleSampleSelect = async (sample: SampleMessage) => {
+    setShowSamples(false); // 샘플 선택 후 숨기기
+    await processMessage(sample.message);
+  };
 
-    const text = e.clipboardData.getData('text');
+  // 메시지 처리 (붙여넣기 또는 샘플)
+  const processMessage = async (text: string) => {
 
     // 1. 원본 메시지 저장 (위에 표시용)
     setOriginalMessage(text);
@@ -109,6 +114,14 @@ export function TransferScreen() {
     setIsAnalyzing(false);
   };
 
+  // 계좌번호 필드에 붙여넣기 감지
+  const handleAccountPaste = async (e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault(); // 기본 붙여넣기 동작 방지
+    const text = e.clipboardData.getData('text');
+    setShowSamples(false); // 붙여넣기 시 샘플 숨기기
+    await processMessage(text);
+  };
+
   // 연락처 선택
   const handleSelectContact = (contact: typeof FREQUENT_CONTACTS[0]) => {
     setSelectedContact({
@@ -162,11 +175,97 @@ export function TransferScreen() {
         <div className="contact-select-screen">
           <h2 className="screen-title">누구에게 보낼까요?</h2>
 
+          {/* 테스트용 샘플 메시지 */}
+          {showSamples && !originalMessage && (
+            <div className="sample-messages-section">
+              <div className="sample-header">
+                <span className="sample-title">💡 테스트해보기</span>
+                <button
+                  className="sample-close"
+                  onClick={() => setShowSamples(false)}
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* 안전한 메시지 */}
+              <div className="sample-category">
+                <div className="sample-category-title">
+                  <span className="category-icon safe">✓</span>
+                  안전한 송금
+                </div>
+                <div className="sample-buttons">
+                  {SAMPLE_MESSAGES.filter(s => s.category === 'safe').slice(0, 3).map(sample => (
+                    <button
+                      key={sample.id}
+                      className="sample-button safe"
+                      onClick={() => handleSampleSelect(sample)}
+                    >
+                      <div className="sample-button-title">{sample.title}</div>
+                      <div className="sample-button-desc">{sample.description}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* 의심스러운 메시지 */}
+              <div className="sample-category">
+                <div className="sample-category-title">
+                  <span className="category-icon suspicious">⚠</span>
+                  주의 필요
+                </div>
+                <div className="sample-buttons">
+                  {SAMPLE_MESSAGES.filter(s => s.category === 'suspicious').slice(0, 3).map(sample => (
+                    <button
+                      key={sample.id}
+                      className="sample-button suspicious"
+                      onClick={() => handleSampleSelect(sample)}
+                    >
+                      <div className="sample-button-title">{sample.title}</div>
+                      <div className="sample-button-desc">{sample.description}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* 위험한 메시지 */}
+              <div className="sample-category">
+                <div className="sample-category-title">
+                  <span className="category-icon dangerous">●</span>
+                  보이스피싱 의심
+                </div>
+                <div className="sample-buttons">
+                  {SAMPLE_MESSAGES.filter(s => s.category === 'dangerous').slice(0, 3).map(sample => (
+                    <button
+                      key={sample.id}
+                      className="sample-button dangerous"
+                      onClick={() => handleSampleSelect(sample)}
+                    >
+                      <div className="sample-button-title">{sample.title}</div>
+                      <div className="sample-button-desc">{sample.description}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* 붙여넣은 원본 메시지 표시 */}
           {originalMessage && (
             <div className="original-message-display">
-              <div className="original-message-label">붙여넣은 메시지</div>
+              <div className="original-message-label">입력된 메시지</div>
               <div className="original-message-content">{originalMessage}</div>
+              <button
+                className="reset-button"
+                onClick={() => {
+                  setOriginalMessage('');
+                  setAccountInput('');
+                  setRiskAnalysis(null);
+                  setShowSamples(true);
+                }}
+              >
+                다시 선택하기
+              </button>
             </div>
           )}
 

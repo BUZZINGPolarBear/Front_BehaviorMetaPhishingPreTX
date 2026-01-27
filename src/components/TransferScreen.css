@@ -2,6 +2,8 @@
  * 실제 뱅킹 앱 스타일 송금 화면 스타일
  */
 
+@import './SampleMessages.css';
+
 .transfer-screen {
   min-height: 100vh;
   background: var(--gray-50);
