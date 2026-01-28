@@ -167,6 +167,40 @@ export class BehaviorTracker {
   }
 
   /**
+   * 머뭇거림 횟수 계산 (1.5초 이상 pause)
+   */
+  private calculateHesitationCount(): number {
+    const HESITATION_THRESHOLD = 1500; // 1.5초
+    return this.typingIntervals.filter(interval => interval >= HESITATION_THRESHOLD).length;
+  }
+
+  /**
+   * 평균 타이핑 간격 계산 (밀리초)
+   */
+  private calculateAvgTypingInterval(): number {
+    if (this.typingIntervals.length === 0) return 0;
+    const sum = this.typingIntervals.reduce((acc, val) => acc + val, 0);
+    return parseFloat((sum / this.typingIntervals.length).toFixed(2));
+  }
+
+  /**
+   * 최대 타이핑 간격 계산 (밀리초)
+   */
+  private calculateMaxTypingInterval(): number {
+    if (this.typingIntervals.length === 0) return 0;
+    return Math.max(...this.typingIntervals);
+  }
+
+  /**
+   * 반복 수정 비율 계산 (backspace/입력 길이)
+   */
+  private calculateEraseInputRatio(): number {
+    const textLength = this.element.value.length;
+    if (textLength === 0) return 0;
+    return parseFloat((this.backspaceCount / (textLength + this.backspaceCount)).toFixed(2));
+  }
+
+  /**
    * 현재 수집된 행위 시그널 반환
    */
   public getSignals(): InputSignals {
@@ -177,6 +211,10 @@ export class BehaviorTracker {
       focusBlurCount: this.focusBlurCount,
       fieldHops: this.fieldHops,
       durationMs: Date.now() - this.startTime,
+      hesitationCount: this.calculateHesitationCount(),
+      avgTypingInterval: this.calculateAvgTypingInterval(),
+      maxTypingInterval: this.calculateMaxTypingInterval(),
+      eraseInputRatio: this.calculateEraseInputRatio(),
     };
   }
 

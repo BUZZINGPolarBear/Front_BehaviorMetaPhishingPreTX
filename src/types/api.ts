@@ -23,6 +23,14 @@ export interface InputSignals {
   fieldHops: number;
   /** 입력에 소요된 총 시간 (밀리초) */
   durationMs: number;
+  /** 머뭇거림 횟수 (1.5초 이상 pause) */
+  hesitationCount: number;
+  /** 평균 타이핑 간격 (밀리초) */
+  avgTypingInterval: number;
+  /** 최대 타이핑 간격 (밀리초) */
+  maxTypingInterval: number;
+  /** 반복 수정 비율 (backspace/입력 길이) */
+  eraseInputRatio: number;
 }
 
 /**

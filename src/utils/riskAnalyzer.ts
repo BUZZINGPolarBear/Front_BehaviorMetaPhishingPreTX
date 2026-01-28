@@ -42,6 +42,24 @@ export function calculateRiskScore(request: AnalyzeRequest): number {
     score += 10;
   }
 
+  // 4-1. 머뭇거림 감지 (15점)
+  // 긴 pause가 3회 이상 발생한 경우
+  if (signals.hesitationCount >= 3) {
+    score += 15;
+  }
+
+  // 4-2. 평균 타이핑 간격이 비정상적으로 긴 경우 (10점)
+  // 1초 이상의 평균 간격은 지시를 받으며 입력하는 경우
+  if (signals.avgTypingInterval > 1000 && signals.avgTypingInterval < 10000) {
+    score += 10;
+  }
+
+  // 4-3. 반복적인 수정 패턴 (15점)
+  // 입력 대비 backspace 비율이 높으면 지웠다가 다시 입력하는 패턴
+  if (signals.eraseInputRatio > 0.3 && signals.backspaceCount > 5) {
+    score += 15;
+  }
+
   // 5. 텍스트 분석
   const textAnalysis = analyzeTextContent(text);
 
@@ -138,6 +156,30 @@ export function extractRiskReasons(request: AnalyzeRequest): RiskReason[] {
       code: "FREQUENT_FOCUS_CHANGE",
       message: "입력 필드 이탈이 잦습니다",
       weight: 0.1,
+    });
+  }
+
+  if (signals.hesitationCount >= 3) {
+    reasons.push({
+      code: "FREQUENT_HESITATION",
+      message: "입력 중 자주 멈칫거렸습니다",
+      weight: 0.15,
+    });
+  }
+
+  if (signals.avgTypingInterval > 1000 && signals.avgTypingInterval < 10000) {
+    reasons.push({
+      code: "SLOW_DELIBERATE_TYPING",
+      message: "천천히 신중하게 입력했습니다",
+      weight: 0.1,
+    });
+  }
+
+  if (signals.eraseInputRatio > 0.3 && signals.backspaceCount > 5) {
+    reasons.push({
+      code: "REPEATED_CORRECTIONS",
+      message: "반복적으로 수정하며 입력했습니다",
+      weight: 0.15,
     });
   }
 
@@ -247,6 +289,19 @@ export function generateRecommendations(
 
   if (reasons.some((r) => r.code === "PASTED_TEXT")) {
     recommendations.push("복사된 내용은 출처를 확인하세요");
+  }
+
+  if (reasons.some((r) => r.code === "FREQUENT_HESITATION") ||
+      reasons.some((r) => r.code === "REPEATED_CORRECTIONS")) {
+    recommendations.push("누군가의 지시를 받고 있다면 즉시 중단하세요");
+  }
+
+  if (reasons.some((r) => r.code === "FREQUENT_FOCUS_CHANGE")) {
+    recommendations.push("다른 창을 보며 입력하고 있다면 의심하세요");
+  }
+
+  if (reasons.some((r) => r.code === "SLOW_DELIBERATE_TYPING")) {
+    recommendations.push("전화 통화 중이라면 상대방을 의심하세요");
   }
 
   if (recommendations.length === 0) {
