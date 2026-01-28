@@ -157,3 +157,143 @@
 .risk-banner.expanded {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
 }
+
+/* 체크리스트 (Medium 레벨) */
+.checklist {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.checklist-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  background: white;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
+  user-select: none;
+}
+
+.checklist-item:hover {
+  background: var(--gray-50);
+}
+
+.checklist-item input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: var(--primary-indigo);
+}
+
+.checklist-item span {
+  font-size: var(--text-sm);
+  color: var(--gray-700);
+  line-height: var(--leading-relaxed);
+}
+
+/* 사기 사례 (High 레벨) */
+.fraud-cases {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.fraud-case {
+  padding: var(--space-3);
+  background: white;
+  border-radius: 8px;
+  border-left: 3px solid #EF4444;
+}
+
+.fraud-case-title {
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--gray-900);
+  margin-bottom: var(--space-1);
+}
+
+.fraud-case-desc {
+  font-size: var(--text-sm);
+  color: var(--gray-600);
+  line-height: var(--leading-relaxed);
+  margin-bottom: var(--space-2);
+}
+
+.fraud-case-warning {
+  font-size: var(--text-xs);
+  color: #DC2626;
+  font-weight: var(--font-medium);
+  background: #FEE2E2;
+  padding: var(--space-2);
+  border-radius: 6px;
+}
+
+/* 스크린샷 업로드 (High 레벨) */
+.screenshot-upload {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.upload-button {
+  width: 100%;
+  padding: var(--space-4);
+  border: 2px dashed var(--gray-300);
+  border-radius: 12px;
+  background: white;
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  color: var(--gray-700);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
+  min-height: 48px;
+}
+
+.upload-button:hover {
+  border-color: var(--primary-indigo);
+  background: var(--gray-50);
+  color: var(--primary-indigo);
+}
+
+.screenshot-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-2) var(--space-3);
+  background: #DBEAFE;
+  border-radius: 8px;
+}
+
+.screenshot-name {
+  font-size: var(--text-sm);
+  color: var(--gray-700);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.screenshot-remove {
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: var(--gray-500);
+  cursor: pointer;
+  padding: var(--space-1);
+  line-height: 1;
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+.screenshot-remove:hover {
+  color: #DC2626;
+}
+
+.upload-hint {
+  font-size: var(--text-xs);
+  color: var(--gray-500);
+  line-height: var(--leading-relaxed);
+  padding: 0 var(--space-2);
+}
