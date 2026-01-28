@@ -78,6 +78,26 @@
   line-height: var(--leading-relaxed);
   white-space: pre-wrap;
   word-break: break-word;
+  margin-bottom: var(--space-2);
+}
+
+.reset-button {
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--gray-300);
+  border-radius: 8px;
+  background: white;
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  color: var(--gray-600);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
+  margin-top: var(--space-2);
+}
+
+.reset-button:hover {
+  background: var(--gray-50);
+  border-color: var(--gray-400);
 }
 
 .analyzing-indicator {
@@ -144,6 +164,27 @@
   background: var(--gray-100);
   font-size: 20px;
   cursor: pointer;
+}
+
+.transfer-button {
+  width: auto;
+  min-width: 80px;
+  padding: 0 var(--space-4);
+  background: var(--gradient-main);
+  color: white;
+  font-size: var(--text-base);
+  font-weight: var(--font-semibold);
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.transfer-button:hover:not(:disabled) {
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+  transform: translateY(-1px);
+}
+
+.transfer-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* 탭 */

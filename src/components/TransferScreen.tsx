@@ -14,11 +14,11 @@ import './TransferScreen.css';
 
 // 가명화된 자주 보낸 사람 데이터
 const FREQUENT_CONTACTS = [
-  { id: 1, name: '김민수', bank: '기업', account: '96904420004025', date: '2026.01.22', favorite: true },
-  { id: 2, name: '이지은', bank: '하나', account: '010-28-23037-2', date: '2025.12.20', favorite: true },
-  { id: 3, name: '박서준', bank: '하나', account: '382-910536-99907', date: '2025.12.20', favorite: true },
-  { id: 4, name: '최유진', bank: '지역농협', account: '35107498278', date: '2025.11.25', favorite: true },
-  { id: 5, name: '정다은', bank: '하나증권', account: '40093804300', date: '2025.08.25', favorite: true },
+  { id: 1, name: '김민수', bank: '스타라이트', account: '96904420004025', date: '2026.01.22', favorite: true },
+  { id: 2, name: '이지은', bank: '오션뱅크', account: '010-28-23037-2', date: '2025.12.20', favorite: true },
+  { id: 3, name: '박서준', bank: '오션뱅크', account: '382-910536-99907', date: '2025.12.20', favorite: true },
+  { id: 4, name: '최유진', bank: '그린필드', account: '35107498278', date: '2025.11.25', favorite: true },
+  { id: 5, name: '정다은', bank: '오션증권', account: '40093804300', date: '2025.08.25', favorite: true },
 ];
 
 type Step = 'select' | 'amount';
@@ -129,6 +129,60 @@ export function TransferScreen() {
       bank: contact.bank,
       account: contact.account,
     });
+    setStep('amount');
+  };
+
+  // 계좌번호 직접 입력 후 송금 버튼 클릭
+  const handleTransferClick = async () => {
+    if (!accountInput.trim()) {
+      alert('계좌번호를 입력해주세요');
+      return;
+    }
+
+    // 입력된 계좌번호로 연락처 확인
+    const matchedContact = FREQUENT_CONTACTS.find(
+      (contact) => contact.account.includes(accountInput)
+    );
+
+    if (matchedContact) {
+      // 기존 연락처면 해당 정보 사용
+      setSelectedContact({
+        name: matchedContact.name,
+        bank: matchedContact.bank,
+        account: matchedContact.account,
+      });
+    } else {
+      // 새 계좌번호면 임시 연락처 생성
+      setSelectedContact({
+        name: '새 연락처',
+        bank: '확인 필요',
+        account: accountInput,
+      });
+    }
+
+    // 위험도 분석 수행 (아직 안 했으면)
+    if (!riskAnalysis && !isAnalyzing) {
+      setIsAnalyzing(true);
+      const signals = getSignals();
+
+      if (signals) {
+        try {
+          const result = await analyzeText({
+            text: accountInput,
+            signals,
+            client: {
+              userAgent: navigator.userAgent,
+              locale: navigator.language,
+            },
+          });
+          setRiskAnalysis(result);
+        } catch (error) {
+          console.error('분석 실패:', error);
+        }
+      }
+      setIsAnalyzing(false);
+    }
+
     setStep('amount');
   };
 
@@ -279,8 +333,19 @@ export function TransferScreen() {
               value={accountInput}
               onChange={(e) => setAccountInput(e.target.value)}
               onPaste={handleAccountPaste}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') {
+                  handleTransferClick();
+                }
+              }}
             />
-            <button className="search-button">🔍</button>
+            <button
+              className="search-button transfer-button"
+              onClick={handleTransferClick}
+              disabled={!accountInput.trim() || isAnalyzing}
+            >
+              {isAnalyzing ? '...' : '송금'}
+            </button>
           </div>
 
           {/* 분석 중 표시 */}
@@ -308,9 +373,9 @@ export function TransferScreen() {
                 onClick={() => handleSelectContact(contact)}
               >
                 <div className="contact-icon">
-                  {contact.bank === '기업' && '🏢'}
-                  {contact.bank.includes('하나') && '🟢'}
-                  {contact.bank === '지역농협' && '🌾'}
+                  {contact.bank === '스타라이트' && '⭐'}
+                  {contact.bank.includes('오션') && '🌊'}
+                  {contact.bank === '그린필드' && '🌾'}
                 </div>
                 <div className="contact-info">
                   <div className="contact-name">{contact.name}</div>
