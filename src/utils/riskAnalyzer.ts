@@ -46,10 +46,10 @@ export function calculateRiskScore(request: AnalyzeRequest): number {
     score += 10;
   }
 
-  // 4-1. 머뭇거림 감지 (15점)
-  // 긴 pause가 3회 이상 발생한 경우
-  if (signals.hesitationCount >= 3) {
-    score += 15;
+  // 4-1. 머뭇거림 감지 (25점) - 보이스피싱 핵심 지표
+  // 긴 pause가 2회 이상 발생한 경우
+  if (signals.hesitationCount >= 2) {
+    score += 25;
   }
 
   // 4-2. 평균 타이핑 간격이 비정상적으로 긴 경우 (10점)
@@ -163,11 +163,11 @@ export function extractRiskReasons(request: AnalyzeRequest): RiskReason[] {
     });
   }
 
-  if (signals.hesitationCount >= 3) {
+  if (signals.hesitationCount >= 2) {
     reasons.push({
       code: "FREQUENT_HESITATION",
-      message: "입력 중 자주 멈칫거렸습니다",
-      weight: 0.15,
+      message: `입력 중 ${signals.hesitationCount}회 멈칫거렸습니다 (보이스피싱 의심)`,
+      weight: 0.25,
     });
   }
 

@@ -12,11 +12,11 @@ export const RISK_WEIGHTS = {
   // 입력 행위 패턴 (최대 100점)
   BEHAVIOR: {
     PASTED_TEXT: 30,              // 붙여넣기
+    FREQUENT_HESITATION: 25,      // 머뭇거림 (1.5초+ pause 2회 이상) - 보이스피싱 핵심 지표
     NO_TYPING: 20,                // 타이핑 없음
     FAST_TYPING: 20,              // 비정상적으로 빠른 타이핑 (5+ cps)
-    NO_CORRECTION: 15,            // 수정 없이 입력 (backspace 0회)
-    FREQUENT_HESITATION: 15,      // 머뭇거림 (1.5초+ pause 3회 이상)
     REPEATED_CORRECTIONS: 15,     // 반복적 수정 (erase ratio 30%+)
+    NO_CORRECTION: 15,            // 수정 없이 입력 (backspace 0회)
     SLOW_DELIBERATE_TYPING: 10,   // 느린 타이핑 (평균 1초+ 간격)
     FREQUENT_FOCUS_CHANGE: 10,    // 잦은 포커스 변경 (5회 이상)
     FAST_INPUT_VS_DURATION: 10,   // 짧은 시간에 긴 텍스트 (10+ cps)
@@ -132,13 +132,13 @@ export function calculateDetailedRiskScore(
     });
   }
 
-  // 4. 머뭇거림 감지 (NEW)
-  if (signals.hesitationCount >= 3) {
+  // 4. 머뭇거림 감지 (보이스피싱 핵심 지표)
+  if (signals.hesitationCount >= 2) {
     const score = RISK_WEIGHTS.BEHAVIOR.FREQUENT_HESITATION;
     behaviorScore += score;
     appliedFactors.push({
       code: 'FREQUENT_HESITATION',
-      name: `입력 중 ${signals.hesitationCount}회 멈칫거림`,
+      name: `입력 중 ${signals.hesitationCount}회 멈칫거림 (보이스피싱 의심)`,
       score,
       category: 'behavior',
     });
