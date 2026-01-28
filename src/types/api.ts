@@ -87,6 +87,22 @@ export interface ExtractedInfo {
 }
 
 /**
+ * 점수 상세 정보
+ */
+export interface ScoreBreakdown {
+  totalScore: number;
+  maxPossibleScore: number;
+  behaviorScore: number;
+  contentScore: number;
+  appliedFactors: Array<{
+    code: string;
+    name: string;
+    score: number;
+    category: 'behavior' | 'content';
+  }>;
+}
+
+/**
  * POST /api/analyze 응답 페이로드
  */
 export interface AnalyzeResponse {
@@ -100,6 +116,8 @@ export interface AnalyzeResponse {
   extracted: ExtractedInfo;
   /** 사용자에게 제공할 권고사항 */
   recommendations: string[];
+  /** 점수 상세 정보 */
+  scoreBreakdown?: ScoreBreakdown;
 }
 
 // ============================================

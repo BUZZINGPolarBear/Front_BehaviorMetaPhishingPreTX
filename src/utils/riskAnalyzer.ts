@@ -12,6 +12,10 @@ import type {
   RiskReason,
   ExtractedInfo,
 } from "../types/api";
+import {
+  calculateDetailedRiskScore,
+  getRiskLevelFromScore,
+} from "./riskScoring";
 
 /**
  * 위험도 점수 계산
@@ -315,18 +319,20 @@ export function generateRecommendations(
  * 전체 분석 수행
  */
 export function analyzeLocally(request: AnalyzeRequest): AnalyzeResponse {
-  const score = calculateRiskScore(request);
-  const riskLevel = getRiskLevel(score);
+  // 새로운 상세 점수 계산 시스템 사용
+  const scoreBreakdown = calculateDetailedRiskScore(request.text, request.signals);
+  const riskLevel = getRiskLevelFromScore(scoreBreakdown.totalScore);
   const reasons = extractRiskReasons(request);
   const extracted = extractInfo(request.text);
   const recommendations = generateRecommendations(riskLevel, reasons);
 
   return {
-    riskScore: score,
+    riskScore: scoreBreakdown.totalScore,
     riskLevel,
     reasons,
     extracted,
     recommendations,
+    scoreBreakdown,
   };
 }
 

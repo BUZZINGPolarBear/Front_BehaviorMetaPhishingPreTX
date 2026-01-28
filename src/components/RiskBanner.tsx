@@ -23,8 +23,15 @@ export function RiskBanner({ analysis }: RiskBannerProps) {
   const [screenshot, setScreenshot] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const { riskLevel, reasons, recommendations } = analysis;
+  const { riskLevel, riskScore, reasons, recommendations, scoreBreakdown } = analysis;
   const relatedFraudCases = riskLevel === 'high' ? getRelatedFraudCases(reasons.map(r => r.code)) : [];
+
+  // 점수별 색상 클래스
+  const getScoreColorClass = () => {
+    if (riskScore >= 70) return 'score-high';
+    if (riskScore >= 40) return 'score-medium';
+    return 'score-low';
+  };
 
   // 위험도별 아이콘
   const getIcon = (level: RiskLevel) => {
@@ -81,7 +88,15 @@ export function RiskBanner({ analysis }: RiskBannerProps) {
       <div className="risk-banner-main" onClick={() => setIsExpanded(!isExpanded)}>
         <div className="risk-indicator">
           <span className="risk-icon">{getIcon(riskLevel)}</span>
-          <span className="risk-message">{getMessage(riskLevel)}</span>
+          <div className="risk-info">
+            <span className="risk-message">{getMessage(riskLevel)}</span>
+            <div className="risk-score-display">
+              <span className={`risk-score ${getScoreColorClass()}`}>
+                위험도 {riskScore}점
+              </span>
+              <span className="risk-score-max"> / 100점</span>
+            </div>
+          </div>
         </div>
         <div className="risk-toggle">
           {isExpanded ? '접기 ▲' : '상세 ▼'}
@@ -91,6 +106,40 @@ export function RiskBanner({ analysis }: RiskBannerProps) {
       {/* 상세 정보 (펼쳤을 때) */}
       {isExpanded && (
         <div className="risk-banner-details">
+          {/* 점수 상세 정보 */}
+          {scoreBreakdown && (
+            <div className="risk-section">
+              <div className="risk-section-title">
+                위험도 점수 상세 ({scoreBreakdown.totalScore}점 / {scoreBreakdown.maxPossibleScore}점)
+              </div>
+
+              {/* 카테고리별 점수 */}
+              <div className="score-categories">
+                <div className="score-category">
+                  <span className="score-category-label">행위 패턴</span>
+                  <span className="score-category-value">{scoreBreakdown.behaviorScore}점</span>
+                </div>
+                <div className="score-category">
+                  <span className="score-category-label">내용 분석</span>
+                  <span className="score-category-value">{scoreBreakdown.contentScore}점</span>
+                </div>
+              </div>
+
+              {/* 적용된 위험 요소 */}
+              {scoreBreakdown.appliedFactors.length > 0 && (
+                <div className="applied-factors">
+                  <div className="applied-factors-title">감지된 위험 요소</div>
+                  {scoreBreakdown.appliedFactors.map((factor, index) => (
+                    <div key={index} className={`factor-item factor-${factor.category}`}>
+                      <span className="factor-name">{factor.name}</span>
+                      <span className="factor-score">+{factor.score}점</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
           {/* 위험 요인 */}
           {reasons.length > 0 && (
             <div className="risk-section">
