@@ -15,7 +15,7 @@ import type {
 import { analyzeLocally, verifyLocally } from "../utils/riskAnalyzer";
 
 // 환경변수에서 백엔드 API URL 가져오기
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+const API_BASE_URL = import.meta.env.VITE_API_URL || "https://web-production-3607a.up.railway.app";
 
 /**
  * 로컬 분석 모드에서는 API 에러가 발생하지 않음
