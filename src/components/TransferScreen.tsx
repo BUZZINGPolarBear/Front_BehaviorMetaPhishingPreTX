@@ -5,10 +5,10 @@
 
 import { useState, useRef } from 'react';
 import { useBehaviorTracker } from '../utils/behaviorTracker';
-import { analyzeText } from '../services/apiClient';
+import { analyzeText, matchPhishing } from '../services/apiClient';
 import { parseTransferMessage } from '../utils/messageParser';
 import { SAMPLE_MESSAGES, type SampleMessage } from '../data/sampleMessages';
-import type { AnalyzeResponse } from '../types/api';
+import type { AnalyzeResponse, MatchResponse } from '../types/api';
 import { RiskBanner } from './RiskBanner';
 import './TransferScreen.css';
 
@@ -36,6 +36,7 @@ export function TransferScreen() {
   const [accountInput, setAccountInput] = useState('');
   const [originalMessage, setOriginalMessage] = useState(''); // 붙여넣은 원본 메시지
   const [riskAnalysis, setRiskAnalysis] = useState<AnalyzeResponse | null>(null);
+  const [matchResult, setMatchResult] = useState<MatchResponse | null>(null); // 백엔드 유사도 매칭 결과
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [showSamples, setShowSamples] = useState(true); // 샘플 메시지 표시 여부
 
@@ -66,21 +67,42 @@ export function TransferScreen() {
       setAccountInput(text);
     }
 
-    // 4. 위험도 분석
+    // 4. 위험도 분석 (로컬 + 백엔드 병렬 처리)
     setIsAnalyzing(true);
     const signals = getSignals();
 
     if (signals) {
       try {
-        const result = await analyzeText({
-          text,
-          signals,
-          client: {
-            userAgent: navigator.userAgent,
-            locale: navigator.language,
-          },
-        });
-        setRiskAnalysis(result);
+        // 로컬 분석과 백엔드 매칭을 병렬로 실행
+        const [localResult, backendResult] = await Promise.all([
+          analyzeText({
+            text,
+            signals,
+            client: {
+              userAgent: navigator.userAgent,
+              locale: navigator.language,
+            },
+          }),
+          matchPhishing(text, {
+            amount_krw: parsed.amount ? parseInt(parsed.amount.replace(/,/g, '')) : undefined,
+            channel: 'app',
+          }),
+        ]);
+
+        setRiskAnalysis(localResult);
+        setMatchResult(backendResult);
+
+        // 백엔드 매칭 결과에 따라 위험도 상향 조정
+        if (backendResult?.top_match && backendResult.top_match.similarity >= 0.7) {
+          // 70% 이상 유사도면 고위험으로 표시
+          if (localResult.riskLevel !== 'high') {
+            setRiskAnalysis({
+              ...localResult,
+              riskLevel: 'high',
+              riskScore: Math.max(localResult.riskScore, 80),
+            });
+          }
+        }
 
         // 5. 금액 자동 입력 (있으면)
         if (parsed.amount) {
@@ -167,15 +189,32 @@ export function TransferScreen() {
 
       if (signals) {
         try {
-          const result = await analyzeText({
-            text: accountInput,
-            signals,
-            client: {
-              userAgent: navigator.userAgent,
-              locale: navigator.language,
-            },
-          });
-          setRiskAnalysis(result);
+          // 로컬 분석과 백엔드 매칭을 병렬로 실행
+          const [localResult, backendResult] = await Promise.all([
+            analyzeText({
+              text: accountInput,
+              signals,
+              client: {
+                userAgent: navigator.userAgent,
+                locale: navigator.language,
+              },
+            }),
+            matchPhishing(accountInput, { channel: 'app' }),
+          ]);
+
+          setRiskAnalysis(localResult);
+          setMatchResult(backendResult);
+
+          // 백엔드 매칭 결과에 따라 위험도 상향 조정
+          if (backendResult?.top_match && backendResult.top_match.similarity >= 0.7) {
+            if (localResult.riskLevel !== 'high') {
+              setRiskAnalysis({
+                ...localResult,
+                riskLevel: 'high',
+                riskScore: Math.max(localResult.riskScore, 80),
+              });
+            }
+          }
         } catch (error) {
           console.error('분석 실패:', error);
         }
@@ -222,7 +261,7 @@ export function TransferScreen() {
       </header>
 
       {/* 위험도 배너 (송금창 위에 표시) */}
-      {riskAnalysis && <RiskBanner analysis={riskAnalysis} />}
+      {riskAnalysis && <RiskBanner analysis={riskAnalysis} matchResult={matchResult} />}
 
       {/* 연락처 선택 화면 */}
       {step === 'select' && (
@@ -315,6 +354,7 @@ export function TransferScreen() {
                   setOriginalMessage('');
                   setAccountInput('');
                   setRiskAnalysis(null);
+                  setMatchResult(null);
                   setShowSamples(true);
                 }}
               >

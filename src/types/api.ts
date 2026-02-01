@@ -197,3 +197,68 @@ export type ApiState<T> =
   | { status: "loading" }
   | { status: "success"; data: T }
   | { status: "error"; error: ApiError };
+
+// ============================================
+// 백엔드 보이스피싱 유사도 매칭 API
+// POST /api/v1/match
+// ============================================
+
+/**
+ * 백엔드 매칭 요청 (POST /api/v1/match)
+ */
+export interface MatchRequest {
+  /** 상담/내점 메모 원문 텍스트 */
+  notes: string;
+  /** 금액 (원) */
+  amount_krw?: number;
+  /** 채널 유형 */
+  channel?: "branch" | "call" | "sms" | "messenger" | "web" | "app";
+  /** 직원이 체크한 행동코드 리스트 */
+  observed_behaviors?: string[];
+  /** 반환할 상위 케이스 수 (기본: 5) */
+  top_k?: number;
+}
+
+/**
+ * 최상위 매칭 결과
+ */
+export interface TopMatchResult {
+  /** 사기 유형명 */
+  scam_type: string;
+  /** 유사도 점수 (0~1) */
+  similarity: number;
+  /** 매칭 근거 (상위 4개 행동코드 설명) */
+  reasons: string[];
+  /** 사용자 메시지 */
+  message: string;
+}
+
+/**
+ * 개별 케이스 요약
+ */
+export interface CaseSummary {
+  /** 케이스 ID */
+  case_id: string;
+  /** 유사도 점수 (0~1) */
+  similarity: number;
+  /** 케이스 요약 */
+  summary: string;
+  /** 사기 유형 */
+  scam_type?: string;
+}
+
+/**
+ * 백엔드 매칭 응답 (POST /api/v1/match)
+ */
+export interface MatchResponse {
+  /** 최상위 매칭 결과 */
+  top_match: TopMatchResult;
+  /** 상위 유사 케이스 목록 */
+  top_cases: CaseSummary[];
+  /** 디버그 정보 (DEV 모드) */
+  debug?: {
+    used_behaviors: string[];
+    source: "claude" | "manual" | "hybrid";
+    claude_response?: Record<string, unknown>;
+  };
+}

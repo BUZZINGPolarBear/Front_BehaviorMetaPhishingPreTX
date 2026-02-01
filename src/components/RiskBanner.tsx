@@ -1,18 +1,21 @@
 /**
  * 위험도 알림 배너
  * 송금창 위에 자연스럽게 표시되는 침착한 보안 알림
+ * 백엔드 유사도 매칭 결과도 함께 표시
  */
 
 import { useState, useRef } from 'react';
-import type { AnalyzeResponse, RiskLevel } from '../types/api';
+import type { AnalyzeResponse, RiskLevel, MatchResponse } from '../types/api';
 import { getRelatedFraudCases } from '../data/fraudCases';
 import './RiskBanner.css';
 
 interface RiskBannerProps {
   analysis: AnalyzeResponse;
+  /** 백엔드 유사도 매칭 결과 (선택) */
+  matchResult?: MatchResponse | null;
 }
 
-export function RiskBanner({ analysis }: RiskBannerProps) {
+export function RiskBanner({ analysis, matchResult }: RiskBannerProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [checklist, setChecklist] = useState({
     knowSender: false,
@@ -25,6 +28,11 @@ export function RiskBanner({ analysis }: RiskBannerProps) {
 
   const { riskLevel, riskScore, reasons, recommendations, scoreBreakdown } = analysis;
   const relatedFraudCases = riskLevel === 'high' ? getRelatedFraudCases(reasons.map(r => r.code)) : [];
+
+  // 백엔드 유사도 매칭 결과에서 유사도 퍼센트 계산
+  const similarityPercent = matchResult?.top_match
+    ? Math.round(matchResult.top_match.similarity * 100)
+    : null;
 
   // 점수별 색상 클래스
   const getScoreColorClass = () => {
@@ -106,6 +114,51 @@ export function RiskBanner({ analysis }: RiskBannerProps) {
       {/* 상세 정보 (펼쳤을 때) */}
       {isExpanded && (
         <div className="risk-banner-details">
+          {/* 백엔드 유사도 매칭 결과 (가장 먼저 표시) */}
+          {matchResult && matchResult.top_match && (
+            <div className="risk-section similarity-section">
+              <div className="similarity-alert">
+                <div className="similarity-icon">🔍</div>
+                <div className="similarity-content">
+                  <div className="similarity-main-message">
+                    이 메시지는 <strong>'{matchResult.top_match.scam_type}'</strong> 유형과{' '}
+                    <span className={`similarity-percent ${similarityPercent && similarityPercent >= 70 ? 'high' : similarityPercent && similarityPercent >= 40 ? 'medium' : 'low'}`}>
+                      {similarityPercent}%
+                    </span>{' '}
+                    유사하므로 주의하십시오.
+                  </div>
+
+                  {/* 매칭 근거 */}
+                  {matchResult.top_match.reasons.length > 0 && (
+                    <div className="similarity-reasons">
+                      <div className="similarity-reasons-title">유사 판단 근거:</div>
+                      <ul className="similarity-reasons-list">
+                        {matchResult.top_match.reasons.slice(0, 4).map((reason, index) => (
+                          <li key={index}>{reason}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* 유사 사례 */}
+                  {matchResult.top_cases.length > 0 && (
+                    <div className="similar-cases">
+                      <div className="similar-cases-title">유사 사례:</div>
+                      <div className="similar-cases-list">
+                        {matchResult.top_cases.slice(0, 3).map((caseItem) => (
+                          <div key={caseItem.case_id} className="similar-case-item">
+                            <span className="case-similarity">{Math.round(caseItem.similarity * 100)}%</span>
+                            <span className="case-summary">{caseItem.summary}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* 점수 상세 정보 */}
           {scoreBreakdown && (
             <div className="risk-section">
