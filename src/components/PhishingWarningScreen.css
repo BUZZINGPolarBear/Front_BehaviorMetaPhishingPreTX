@@ -422,6 +422,37 @@
   text-decoration: underline;
 }
 
+.screenshot-analyze {
+  width: 100%;
+  margin-top: 8px;
+  padding: 12px;
+  background: #EFF6FF;
+  border: 1px solid #3B82F6;
+  border-radius: 10px;
+  font-size: 14px;
+  color: #1D4ED8;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.screenshot-analyze:hover:not(:disabled) {
+  background: #DBEAFE;
+}
+
+.screenshot-analyze:disabled {
+  background: #F3F4F6;
+  border-color: #D1D5DB;
+  color: #9CA3AF;
+  cursor: not-allowed;
+}
+
+.screenshot-button:disabled {
+  background: #F3F4F6;
+  border-color: #D1D5DB;
+  color: #6B7280;
+  cursor: wait;
+}
+
 /* 하단 버튼 */
 .action-buttons {
   position: fixed;

@@ -10,6 +10,7 @@ import type {
   VerifyResponse,
   MatchRequest,
   MatchResponse,
+  ScreenshotAnalysisResponse,
 } from "../types/api";
 
 import { analyzeLocally, verifyLocally } from "../utils/riskAnalyzer";
@@ -256,5 +257,44 @@ export async function checkBackendHealth(): Promise<boolean> {
     return response.ok;
   } catch {
     return false;
+  }
+}
+
+/**
+ * 대화 스크린샷 분석 API 호출
+ *
+ * @param file 분석할 이미지 파일
+ * @returns 스크린샷 분석 결과 (사기 의심 여부, 유형, 위험 신호 등)
+ */
+export async function analyzeScreenshot(
+  file: File
+): Promise<ScreenshotAnalysisResponse | null> {
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    console.log("스크린샷 분석 요청:", file.name, file.size, file.type);
+
+    const response = await fetch(`${API_BASE_URL}/api/v1/analyze-screenshot`, {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error("스크린샷 분석 API 오류:", response.status, errorData);
+      return null;
+    }
+
+    const data: ScreenshotAnalysisResponse = await response.json();
+    console.log("스크린샷 분석 결과:", {
+      is_suspicious: data.is_suspicious,
+      confidence: Math.round(data.confidence * 100) + "%",
+      scam_type: data.scam_type_name,
+    });
+    return data;
+  } catch (error) {
+    console.error("스크린샷 분석 API 호출 실패:", error);
+    return null;
   }
 }

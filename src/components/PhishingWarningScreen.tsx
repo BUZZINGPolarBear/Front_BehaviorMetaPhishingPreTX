@@ -4,7 +4,9 @@
  */
 
 import { useState, useRef, useEffect } from 'react';
-import type { AnalyzeResponse, MatchResponse } from '../types/api';
+import type { AnalyzeResponse, MatchResponse, ScreenshotAnalysisResponse } from '../types/api';
+import { analyzeScreenshot } from '../services/apiClient';
+import { ScreenshotAnalysisModal } from './ScreenshotAnalysisModal';
 import './PhishingWarningScreen.css';
 
 interface PhishingWarningScreenProps {
@@ -57,6 +59,9 @@ export function PhishingWarningScreen({
   const [checkedItems, setCheckedItems] = useState<Record<number, boolean>>({});
   const [screenshot, setScreenshot] = useState<File | null>(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [isAnalyzingScreenshot, setIsAnalyzingScreenshot] = useState(false);
+  const [screenshotAnalysisResult, setScreenshotAnalysisResult] = useState<ScreenshotAnalysisResponse | null>(null);
+  const [showAnalysisModal, setShowAnalysisModal] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // 컴포넌트 마운트 시 스크롤 최상단으로 이동
@@ -86,11 +91,26 @@ export function PhishingWarningScreen({
   // 체크된 항목 수 (위험 신호)
   const checkedCount = Object.values(checkedItems).filter(Boolean).length;
 
-  // 스크린샷 업로드
-  const handleScreenshotUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // 스크린샷 업로드 및 분석
+  const handleScreenshotUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file && file.type.startsWith('image/')) {
       setScreenshot(file);
+
+      // 스크린샷 분석 API 호출
+      setIsAnalyzingScreenshot(true);
+      try {
+        const result = await analyzeScreenshot(file);
+        if (result) {
+          setScreenshotAnalysisResult(result);
+          setShowAnalysisModal(true);
+        }
+      } catch (error) {
+        console.error('스크린샷 분석 실패:', error);
+        alert('스크린샷 분석 중 오류가 발생했습니다.');
+      } finally {
+        setIsAnalyzingScreenshot(false);
+      }
     }
   };
 
@@ -255,8 +275,14 @@ export function PhishingWarningScreen({
         <button
           className="screenshot-button"
           onClick={() => fileInputRef.current?.click()}
+          disabled={isAnalyzingScreenshot}
         >
-          {screenshot ? (
+          {isAnalyzingScreenshot ? (
+            <>
+              <span className="screenshot-icon">⏳</span>
+              <span>AI가 대화 내용을 분석 중...</span>
+            </>
+          ) : screenshot ? (
             <>
               <span className="screenshot-icon">✓</span>
               <span>스크린샷 첨부됨: {screenshot.name}</span>
@@ -269,13 +295,25 @@ export function PhishingWarningScreen({
           )}
         </button>
 
-        {screenshot && (
-          <button
-            className="screenshot-remove"
-            onClick={() => setScreenshot(null)}
-          >
-            첨부 취소
-          </button>
+        {screenshot && !isAnalyzingScreenshot && (
+          <>
+            <button
+              className="screenshot-analyze"
+              onClick={() => screenshotAnalysisResult && setShowAnalysisModal(true)}
+              disabled={!screenshotAnalysisResult}
+            >
+              {screenshotAnalysisResult ? '분석 결과 다시 보기' : '분석 완료 대기 중...'}
+            </button>
+            <button
+              className="screenshot-remove"
+              onClick={() => {
+                setScreenshot(null);
+                setScreenshotAnalysisResult(null);
+              }}
+            >
+              첨부 취소
+            </button>
+          </>
         )}
       </div>
 
@@ -333,6 +371,14 @@ export function PhishingWarningScreen({
             </div>
           </div>
         </div>
+      )}
+
+      {/* 스크린샷 분석 결과 모달 */}
+      {showAnalysisModal && screenshotAnalysisResult && (
+        <ScreenshotAnalysisModal
+          result={screenshotAnalysisResult}
+          onClose={() => setShowAnalysisModal(false)}
+        />
       )}
     </div>
   );

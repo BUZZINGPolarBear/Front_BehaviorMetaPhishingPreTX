@@ -262,3 +262,27 @@ export interface MatchResponse {
     claude_response?: Record<string, unknown>;
   };
 }
+
+// ============================================
+// POST /api/v1/analyze-screenshot - 스크린샷 분석
+// ============================================
+
+/**
+ * 스크린샷 분석 응답
+ */
+export interface ScreenshotAnalysisResponse {
+  /** 사기 의심 여부 */
+  is_suspicious: boolean;
+  /** 신뢰도 (0~1) */
+  confidence: number;
+  /** 의심 사기 유형 ID (P01~P10) */
+  scam_type: string | null;
+  /** 사기 유형명 */
+  scam_type_name: string | null;
+  /** 추출된 대화 내용 */
+  extracted_text: string;
+  /** 감지된 위험 신호 */
+  risk_indicators: string[];
+  /** 권고 사항 */
+  recommendation: string;
+}
