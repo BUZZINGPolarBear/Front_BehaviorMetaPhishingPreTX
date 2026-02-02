@@ -12,8 +12,8 @@ export const RISK_WEIGHTS = {
   // 입력 행위 패턴 (최대 100점)
   BEHAVIOR: {
     PASTED_TEXT: 30,              // 붙여넣기
-    STRESS_TOUCH: 45,             // 스트레스 터치 (4회 이상 머뭇거림) - 보이스피싱 강력 지표
-    FREQUENT_HESITATION: 25,      // 머뭇거림 (1.5초+ pause 2~3회) - 보이스피싱 핵심 지표
+    STRESS_TOUCH: 50,             // 스트레스 터치 (3회 이상 머뭇거림) - 보이스피싱 강력 지표
+    FREQUENT_HESITATION: 30,      // 머뭇거림 (1.5초+ pause 1~2회) - 보이스피싱 핵심 지표
     NO_TYPING: 20,                // 타이핑 없음
     FAST_TYPING: 20,              // 비정상적으로 빠른 타이핑 (5+ cps)
     REPEATED_CORRECTIONS: 15,     // 반복적 수정 (erase ratio 30%+)
@@ -134,8 +134,8 @@ export function calculateDetailedRiskScore(
   }
 
   // 4. 머뭇거림 감지 (보이스피싱 핵심 지표)
-  // 4회 이상은 "스트레스 터치" - 전화 지시를 받으며 입력하는 강력한 패턴
-  if (signals.hesitationCount >= 4) {
+  // 3회 이상은 "스트레스 터치" - 전화 지시를 받으며 입력하는 강력한 패턴
+  if (signals.hesitationCount >= 3) {
     const score = RISK_WEIGHTS.BEHAVIOR.STRESS_TOUCH;
     behaviorScore += score;
     appliedFactors.push({
@@ -144,7 +144,7 @@ export function calculateDetailedRiskScore(
       score,
       category: 'behavior',
     });
-  } else if (signals.hesitationCount >= 2) {
+  } else if (signals.hesitationCount >= 1) {
     const score = RISK_WEIGHTS.BEHAVIOR.FREQUENT_HESITATION;
     behaviorScore += score;
     appliedFactors.push({

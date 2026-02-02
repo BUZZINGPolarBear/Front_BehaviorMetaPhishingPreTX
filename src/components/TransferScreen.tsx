@@ -203,40 +203,57 @@ export function TransferScreen() {
 
       if (signals) {
         try {
-          // 로컬 분석과 백엔드 매칭을 병렬로 실행
-          const [localResult, backendResult] = await Promise.all([
-            analyzeText({
-              text: accountInput,
-              signals,
-              client: {
-                userAgent: navigator.userAgent,
-                locale: navigator.language,
-              },
-            }),
-            matchPhishing(accountInput, { channel: 'app' }),
-          ]);
+          // 직접 타이핑한 경우: 행위 분석만 수행 (Claude 백엔드 호출 생략)
+          // 붙여넣기한 경우에만 텍스트 내용 분석 (백엔드 Claude)
+          const isDirectTyping = !signals.wasPasted;
+
+          // 로컬 행위 분석 수행
+          const localResult = await analyzeText({
+            text: accountInput,
+            signals,
+            client: {
+              userAgent: navigator.userAgent,
+              locale: navigator.language,
+            },
+          });
 
           setRiskAnalysis(localResult);
-          setMatchResult(backendResult);
 
-          // 백엔드 매칭 결과에 따라 위험도 상향 조정
-          let finalRiskLevel = localResult.riskLevel;
-          if (backendResult?.top_match && backendResult.top_match.similarity >= 0.7) {
-            if (localResult.riskLevel !== 'high') {
-              setRiskAnalysis({
-                ...localResult,
-                riskLevel: 'high' as const,
-                riskScore: Math.max(localResult.riskScore, 80),
-              });
-              finalRiskLevel = 'high';
+          // 직접 타이핑한 경우: 스트레스 터치만 감지, 백엔드 호출 안함
+          if (isDirectTyping) {
+            console.log('직접 입력 감지 - 행위 분석만 수행 (백엔드 Claude 호출 생략)');
+
+            // 고위험(스트레스 터치)이면 경고 화면으로 이동
+            if (localResult.riskLevel === 'high') {
+              setIsAnalyzing(false);
+              setStep('warning');
+              return;
             }
-          }
+          } else {
+            // 붙여넣기한 경우: 백엔드 Claude로 텍스트 내용 분석
+            console.log('붙여넣기 감지 - 백엔드 Claude로 텍스트 분석');
+            const backendResult = await matchPhishing(accountInput, { channel: 'app' });
+            setMatchResult(backendResult);
 
-          // 고위험이면 경고 화면으로 이동
-          if (finalRiskLevel === 'high' || localResult.riskLevel === 'high') {
-            setIsAnalyzing(false);
-            setStep('warning');
-            return;
+            // 백엔드 매칭 결과에 따라 위험도 상향 조정
+            let finalRiskLevel = localResult.riskLevel;
+            if (backendResult?.top_match && backendResult.top_match.similarity >= 0.7) {
+              if (localResult.riskLevel !== 'high') {
+                setRiskAnalysis({
+                  ...localResult,
+                  riskLevel: 'high' as const,
+                  riskScore: Math.max(localResult.riskScore, 80),
+                });
+                finalRiskLevel = 'high';
+              }
+            }
+
+            // 고위험이면 경고 화면으로 이동
+            if (finalRiskLevel === 'high' || localResult.riskLevel === 'high') {
+              setIsAnalyzing(false);
+              setStep('warning');
+              return;
+            }
           }
         } catch (error) {
           console.error('분석 실패:', error);
