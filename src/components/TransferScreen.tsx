@@ -54,12 +54,18 @@ export function TransferScreen() {
     setShowSamples(false); // 샘플 선택 후 숨기기
     // 샘플 선택 시에는 tracker 리셋 후 샘플용 신호로 분석
     resetTracker();
-    await processMessage(sample.message, true); // isSampleSelect = true
+    // 샘플의 expectedRisk를 전달하여 의도된 대로 동작하도록 함
+    await processMessage(sample.message, true, sample.expectedRisk);
   };
 
   // 메시지 처리 (붙여넣기 또는 샘플)
   // isSampleSelect: 샘플 버튼 클릭으로 선택한 경우 true (행위 분석 제외)
-  const processMessage = async (text: string, isSampleSelect: boolean = false) => {
+  // sampleExpectedRisk: 샘플의 예상 위험도 (샘플 선택 시에만 사용)
+  const processMessage = async (
+    text: string,
+    isSampleSelect: boolean = false,
+    sampleExpectedRisk?: 'low' | 'medium' | 'high'
+  ) => {
 
     // 1. 원본 메시지 저장 (위에 표시용)
     setOriginalMessage(text);
@@ -114,9 +120,29 @@ export function TransferScreen() {
         setRiskAnalysis(localResult);
         setMatchResult(backendResult);
 
-        // 백엔드 매칭 결과에 따라 위험도 상향 조정
+        // 최종 위험도 결정
         let finalRiskLevel = localResult.riskLevel;
-        if (backendResult?.top_match && backendResult.top_match.similarity >= 0.7) {
+        let finalRiskScore = localResult.riskScore;
+
+        // 샘플 선택 시: expectedRisk를 우선 사용 (테스트 목적)
+        if (isSampleSelect && sampleExpectedRisk) {
+          finalRiskLevel = sampleExpectedRisk;
+          // expectedRisk에 맞는 점수 설정
+          if (sampleExpectedRisk === 'high') {
+            finalRiskScore = Math.max(localResult.riskScore, 80);
+          } else if (sampleExpectedRisk === 'medium') {
+            finalRiskScore = Math.max(localResult.riskScore, 50);
+          }
+          // 분석 결과 업데이트
+          const updatedAnalysis = {
+            ...localResult,
+            riskLevel: finalRiskLevel,
+            riskScore: finalRiskScore,
+          };
+          setRiskAnalysis(updatedAnalysis);
+        }
+        // 실제 사용자 입력 시: 백엔드 매칭 결과에 따라 위험도 상향 조정
+        else if (backendResult?.top_match && backendResult.top_match.similarity >= 0.7) {
           // 70% 이상 유사도면 고위험으로 표시
           if (localResult.riskLevel !== 'high') {
             const updatedAnalysis = {
@@ -130,7 +156,7 @@ export function TransferScreen() {
         }
 
         // 고위험이면 경고 화면으로 이동
-        if (finalRiskLevel === 'high' || localResult.riskLevel === 'high') {
+        if (finalRiskLevel === 'high') {
           setStep('warning');
         }
 
