@@ -3,7 +3,7 @@
  * 메시지 붙여넣기 시 자동 파싱 및 위험도 분석
  */
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useBehaviorTracker } from '../utils/behaviorTracker';
 import { analyzeText, matchPhishing } from '../services/apiClient';
 import { parseTransferMessage } from '../utils/messageParser';
@@ -43,6 +43,11 @@ export function TransferScreen() {
 
   const accountInputRef = useRef<HTMLInputElement>(null);
   const { getSignals } = useBehaviorTracker(accountInputRef);
+
+  // 페이지 전환 시 스크롤 최상단으로 이동
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [step]);
 
   // 샘플 메시지 적용
   const handleSampleSelect = async (sample: SampleMessage) => {

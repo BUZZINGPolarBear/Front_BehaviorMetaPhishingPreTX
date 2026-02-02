@@ -3,7 +3,7 @@
  * riskLevel === 'high'일 때 표시되는 별도의 경고/확인 화면
  */
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import type { AnalyzeResponse, MatchResponse } from '../types/api';
 import './PhishingWarningScreen.css';
 
@@ -58,6 +58,11 @@ export function PhishingWarningScreen({
   const [screenshot, setScreenshot] = useState<File | null>(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // 컴포넌트 마운트 시 스크롤 최상단으로 이동
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const { riskScore, scoreBreakdown } = analysis;
 
