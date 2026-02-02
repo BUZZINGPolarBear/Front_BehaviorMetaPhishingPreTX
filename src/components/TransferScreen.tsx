@@ -278,6 +278,14 @@ export function TransferScreen() {
         matchResult={matchResult}
         onProceedAnyway={() => {
           // 그럼에도 불구하고 송금하기 -> 금액 입력으로 이동
+          // selectedContact가 없으면 accountInput으로 임시 연락처 생성
+          if (!selectedContact && accountInput) {
+            setSelectedContact({
+              name: '수신인',
+              bank: '확인 필요',
+              account: accountInput,
+            });
+          }
           setStep('amount');
         }}
         onCancel={() => {
