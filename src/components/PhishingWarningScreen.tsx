@@ -59,7 +59,7 @@ export function PhishingWarningScreen({
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const { riskScore, reasons, scoreBreakdown } = analysis;
+  const { riskScore, scoreBreakdown } = analysis;
 
   // 매칭된 사기 유형
   const scamType = matchResult?.top_match?.scam_type || 'default';
