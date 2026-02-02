@@ -89,7 +89,7 @@ export const FRAUD_CASES: FraudCase[] = [
 export function getRelatedFraudCases(reasonCodes: string[]): FraudCase[] {
   // 모든 코드가 행위 패턴과 관련된 경우
   const behaviorCodes = ['PASTED_TEXT', 'NO_TYPING', 'FAST_TYPING', 'NO_CORRECTION',
-                         'FREQUENT_FOCUS_CHANGE', 'FREQUENT_HESITATION',
+                         'FREQUENT_FOCUS_CHANGE', 'FREQUENT_HESITATION', 'STRESS_TOUCH',
                          'SLOW_DELIBERATE_TYPING', 'REPEATED_CORRECTIONS'];
 
   const hasBehaviorPattern = reasonCodes.some(code => behaviorCodes.includes(code));

@@ -10,6 +10,7 @@ import { parseTransferMessage } from '../utils/messageParser';
 import { SAMPLE_MESSAGES, type SampleMessage } from '../data/sampleMessages';
 import type { AnalyzeResponse, MatchResponse } from '../types/api';
 import { RiskBanner } from './RiskBanner';
+import { PhishingWarningScreen } from './PhishingWarningScreen';
 import './TransferScreen.css';
 
 // 가명화된 자주 보낸 사람 데이터
@@ -21,7 +22,7 @@ const FREQUENT_CONTACTS = [
   { id: 5, name: '정다은', bank: '오션증권', account: '40093804300', date: '2025.08.25', favorite: true },
 ];
 
-type Step = 'select' | 'amount';
+type Step = 'select' | 'warning' | 'amount';
 
 interface SelectedContact {
   name: string;
@@ -93,15 +94,23 @@ export function TransferScreen() {
         setMatchResult(backendResult);
 
         // 백엔드 매칭 결과에 따라 위험도 상향 조정
+        let finalRiskLevel = localResult.riskLevel;
         if (backendResult?.top_match && backendResult.top_match.similarity >= 0.7) {
           // 70% 이상 유사도면 고위험으로 표시
           if (localResult.riskLevel !== 'high') {
-            setRiskAnalysis({
+            const updatedAnalysis = {
               ...localResult,
-              riskLevel: 'high',
+              riskLevel: 'high' as const,
               riskScore: Math.max(localResult.riskScore, 80),
-            });
+            };
+            setRiskAnalysis(updatedAnalysis);
+            finalRiskLevel = 'high';
           }
+        }
+
+        // 고위험이면 경고 화면으로 이동
+        if (finalRiskLevel === 'high' || localResult.riskLevel === 'high') {
+          setStep('warning');
         }
 
         // 5. 금액 자동 입력 (있으면)
@@ -206,14 +215,23 @@ export function TransferScreen() {
           setMatchResult(backendResult);
 
           // 백엔드 매칭 결과에 따라 위험도 상향 조정
+          let finalRiskLevel = localResult.riskLevel;
           if (backendResult?.top_match && backendResult.top_match.similarity >= 0.7) {
             if (localResult.riskLevel !== 'high') {
               setRiskAnalysis({
                 ...localResult,
-                riskLevel: 'high',
+                riskLevel: 'high' as const,
                 riskScore: Math.max(localResult.riskScore, 80),
               });
+              finalRiskLevel = 'high';
             }
+          }
+
+          // 고위험이면 경고 화면으로 이동
+          if (finalRiskLevel === 'high' || localResult.riskLevel === 'high') {
+            setIsAnalyzing(false);
+            setStep('warning');
+            return;
           }
         } catch (error) {
           console.error('분석 실패:', error);
@@ -222,7 +240,12 @@ export function TransferScreen() {
       setIsAnalyzing(false);
     }
 
-    setStep('amount');
+    // 고위험이 아닌 경우만 금액 입력으로 이동
+    if (riskAnalysis?.riskLevel === 'high') {
+      setStep('warning');
+    } else {
+      setStep('amount');
+    }
   };
 
   // 빠른 금액 버튼
@@ -246,6 +269,31 @@ export function TransferScreen() {
     if (!value) return '';
     return parseInt(value).toLocaleString('ko-KR');
   };
+
+  // 보이스피싱 의심 경고 화면은 전체 화면으로 표시
+  if (step === 'warning' && riskAnalysis) {
+    return (
+      <PhishingWarningScreen
+        analysis={riskAnalysis}
+        matchResult={matchResult}
+        onProceedAnyway={() => {
+          // 그럼에도 불구하고 송금하기 -> 금액 입력으로 이동
+          setStep('amount');
+        }}
+        onCancel={() => {
+          // 송금 취소 -> 초기 화면으로
+          setStep('select');
+          setOriginalMessage('');
+          setAccountInput('');
+          setRiskAnalysis(null);
+          setMatchResult(null);
+          setShowSamples(true);
+          setSelectedContact(null);
+          setAmount('');
+        }}
+      />
+    );
+  }
 
   return (
     <div className="transfer-screen">

@@ -222,8 +222,8 @@ function analyzeTextContent(text: string): {
   const accountMatch = text.match(accountPattern);
   const accountNumber = accountMatch ? accountMatch[0] : null;
 
-  // 은행명 추출
-  const bankNames = ["국민", "신한", "우리", "하나", "기업", "농협", "KB", "NH"];
+  // 은행명 추출 (가명)
+  const bankNames = ["햇살", "은하", "새벽", "달빛", "별빛", "푸른숲", "바람", "구름", "무지개", "바다"];
   let bankName: string | null = null;
   for (const bank of bankNames) {
     if (text.includes(bank)) {

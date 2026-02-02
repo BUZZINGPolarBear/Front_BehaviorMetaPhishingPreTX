@@ -78,7 +78,7 @@ export interface RiskReason {
 export interface ExtractedInfo {
   /** 추출된 금액 (예: "1000000") */
   amount?: string;
-  /** 은행 힌트 (예: "KB", "신한") */
+  /** 은행 힌트 (예: "햇살", "은하") */
   bankHint?: string;
   /** 마스킹된 계좌번호 (예: "110-***-****56") */
   accountMasked?: string;

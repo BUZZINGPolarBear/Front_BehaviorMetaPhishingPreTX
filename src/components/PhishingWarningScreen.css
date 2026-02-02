@@ -1,0 +1,568 @@
+/**
+ * 보이스피싱 의심 경고 화면 스타일
+ */
+
+.phishing-warning-screen {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #FEE2E2 0%, #FFFFFF 30%);
+  padding-bottom: 200px;
+}
+
+/* 헤더 */
+.warning-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: #DC2626;
+  color: white;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.warning-header .back-button {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  font-size: 20px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.warning-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.warning-badge {
+  background: white;
+  color: #DC2626;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 12px;
+}
+
+/* 메인 경고 */
+.warning-main {
+  text-align: center;
+  padding: 32px 20px 24px;
+}
+
+.warning-icon {
+  font-size: 64px;
+  margin-bottom: 16px;
+}
+
+.warning-headline {
+  font-size: 24px;
+  font-weight: 700;
+  color: #DC2626;
+  margin: 0 0 8px 0;
+}
+
+.warning-subtext {
+  font-size: 16px;
+  color: #6B7280;
+  margin: 0;
+}
+
+/* 위험도 점수 */
+.risk-score-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  margin: 0 20px 24px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.15);
+}
+
+.risk-score-circle {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #DC2626, #EF4444);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  margin-bottom: 8px;
+}
+
+.risk-score-value {
+  font-size: 36px;
+  font-weight: 700;
+}
+
+.risk-score-unit {
+  font-size: 14px;
+  font-weight: 500;
+  margin-left: 2px;
+}
+
+.risk-score-label {
+  font-size: 14px;
+  color: #6B7280;
+  font-weight: 500;
+}
+
+/* 유사도 섹션 */
+.similarity-section {
+  margin: 0 20px 24px;
+  background: #FEF3C7;
+  border: 2px solid #F59E0B;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.similarity-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 16px;
+  background: #F59E0B;
+  color: white;
+}
+
+.similarity-icon {
+  font-size: 20px;
+}
+
+.similarity-title {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.similarity-content {
+  padding: 16px;
+}
+
+.similarity-type,
+.similarity-percent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.type-label,
+.percent-label {
+  font-size: 14px;
+  color: #92400E;
+}
+
+.type-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: #B45309;
+}
+
+.percent-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: #B45309;
+}
+
+.percent-value.high {
+  color: #DC2626;
+}
+
+.similarity-reasons {
+  margin-top: 12px;
+}
+
+.reasons-title {
+  font-size: 13px;
+  color: #92400E;
+  margin-bottom: 8px;
+}
+
+.reasons-list {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.reasons-list li {
+  font-size: 13px;
+  color: #78350F;
+  margin-bottom: 4px;
+}
+
+/* 감지된 위험 요소 */
+.detected-risks-section {
+  margin: 0 20px 24px;
+  background: white;
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1F2937;
+  margin: 0 0 12px 0;
+}
+
+.detected-risks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.risk-factor {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: #F3F4F6;
+  border-radius: 10px;
+}
+
+.risk-factor.behavior {
+  background: #FEE2E2;
+}
+
+.risk-factor.content {
+  background: #FEF3C7;
+}
+
+.factor-icon {
+  font-size: 16px;
+}
+
+.factor-name {
+  flex: 1;
+  font-size: 13px;
+  color: #374151;
+}
+
+.factor-score {
+  font-size: 13px;
+  font-weight: 600;
+  color: #DC2626;
+}
+
+/* 체크리스트 섹션 */
+.checklist-section {
+  margin: 0 20px 24px;
+  background: white;
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.checklist-warning {
+  font-size: 12px;
+  font-weight: 400;
+  color: #DC2626;
+  margin-left: 8px;
+}
+
+.checklist-guide {
+  font-size: 14px;
+  color: #6B7280;
+  margin: 0 0 16px 0;
+}
+
+.checklist-items {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.checklist-item {
+  display: flex;
+  gap: 12px;
+  padding: 14px;
+  background: #F9FAFB;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.checklist-item:hover {
+  background: #F3F4F6;
+}
+
+.checklist-item.checked {
+  background: #FEE2E2;
+  border-color: #DC2626;
+}
+
+.checkbox {
+  width: 24px;
+  height: 24px;
+  border: 2px solid #D1D5DB;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.checklist-item.checked .checkbox {
+  background: #DC2626;
+  border-color: #DC2626;
+}
+
+.checkmark {
+  color: white;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.checklist-content {
+  flex: 1;
+}
+
+.checklist-question {
+  font-size: 14px;
+  color: #1F2937;
+  line-height: 1.4;
+}
+
+.checklist-warning-text {
+  font-size: 13px;
+  color: #DC2626;
+  margin-top: 8px;
+  padding: 8px;
+  background: rgba(220, 38, 38, 0.1);
+  border-radius: 6px;
+}
+
+.checklist-result {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px;
+  margin-top: 16px;
+  border-radius: 12px;
+}
+
+.checklist-result.danger {
+  background: #DC2626;
+  color: white;
+}
+
+.result-icon {
+  font-size: 20px;
+}
+
+.result-text {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* 스크린샷 섹션 */
+.screenshot-section {
+  margin: 0 20px 24px;
+  background: white;
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.screenshot-guide {
+  font-size: 14px;
+  color: #6B7280;
+  margin: 0 0 16px 0;
+  line-height: 1.5;
+}
+
+.screenshot-button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px;
+  background: #F3F4F6;
+  border: 2px dashed #D1D5DB;
+  border-radius: 12px;
+  font-size: 14px;
+  color: #6B7280;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.screenshot-button:hover {
+  background: #E5E7EB;
+  border-color: #9CA3AF;
+}
+
+.screenshot-icon {
+  font-size: 18px;
+}
+
+.screenshot-remove {
+  width: 100%;
+  margin-top: 8px;
+  padding: 10px;
+  background: transparent;
+  border: none;
+  font-size: 13px;
+  color: #6B7280;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+/* 하단 버튼 */
+.action-buttons {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 16px 20px;
+  background: white;
+  border-top: 1px solid #E5E7EB;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 100;
+}
+
+.call-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 16px;
+  background: #2563EB;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.call-button:hover {
+  background: #1D4ED8;
+}
+
+.button-icon {
+  font-size: 18px;
+}
+
+.proceed-button {
+  width: 100%;
+  padding: 16px;
+  background: #F3F4F6;
+  color: #6B7280;
+  border: none;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.proceed-button:hover {
+  background: #E5E7EB;
+  color: #4B5563;
+}
+
+.cancel-button-large {
+  width: 100%;
+  padding: 14px;
+  background: #DC2626;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cancel-button-large:hover {
+  background: #B91C1C;
+}
+
+/* 확인 다이얼로그 */
+.confirm-dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  padding: 20px;
+}
+
+.confirm-dialog {
+  background: white;
+  border-radius: 20px;
+  padding: 24px;
+  max-width: 360px;
+  width: 100%;
+  text-align: center;
+}
+
+.dialog-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.dialog-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #DC2626;
+  margin: 0 0 12px 0;
+}
+
+.dialog-message {
+  font-size: 14px;
+  color: #4B5563;
+  line-height: 1.6;
+  margin: 0 0 24px 0;
+}
+
+.dialog-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dialog-cancel {
+  width: 100%;
+  padding: 14px;
+  background: #2563EB;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.dialog-proceed {
+  width: 100%;
+  padding: 14px;
+  background: #F3F4F6;
+  color: #6B7280;
+  border: none;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
