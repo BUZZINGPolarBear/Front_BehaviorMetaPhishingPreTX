@@ -23,10 +23,10 @@ export const RISK_WEIGHTS = {
     FAST_INPUT_VS_DURATION: 10,   // 짧은 시간에 긴 텍스트 (10+ cps)
   },
 
-  // 텍스트 내용 분석 (최대 55점)
+  // 텍스트 내용 분석 (최대 65점)
   CONTENT: {
     URL_DETECTED: 25,             // URL 포함
-    HIGH_AMOUNT: 20,              // 고액 거래 (100만원 이상)
+    HIGH_AMOUNT: 30,              // 고액 거래 (100만원 이상) - suspicious가 medium이 되도록 조정
     ACCOUNT_NUMBER: 10,           // 계좌번호 포함
   },
 } as const;
@@ -85,114 +85,116 @@ export function calculateDetailedRiskScore(
   let contentScore = 0;
 
   // ===== 행위 패턴 분석 =====
+  // durationMs가 0이면 실제 입력 행위가 없었음 (샘플 선택 등) - 행위 분석 건너뛰기
+  const hasActualInput = signals.durationMs > 0;
 
-  // 1. 붙여넣기 감지
-  if (signals.wasPasted) {
-    const score = RISK_WEIGHTS.BEHAVIOR.PASTED_TEXT;
-    behaviorScore += score;
-    appliedFactors.push({
-      code: 'PASTED_TEXT',
-      name: '텍스트 붙여넣기',
-      score,
-      category: 'behavior',
-    });
-  }
+  if (hasActualInput) {
+    // 1. 붙여넣기 감지
+    if (signals.wasPasted) {
+      const score = RISK_WEIGHTS.BEHAVIOR.PASTED_TEXT;
+      behaviorScore += score;
+      appliedFactors.push({
+        code: 'PASTED_TEXT',
+        name: '텍스트 붙여넣기',
+        score,
+        category: 'behavior',
+      });
+    }
 
-  // 2. 타이핑 속도 분석
-  if (signals.typingSpeedCps === 0 && text.length > 0) {
-    // 타이핑 없음 (전부 붙여넣기)
-    const score = RISK_WEIGHTS.BEHAVIOR.NO_TYPING;
-    behaviorScore += score;
-    appliedFactors.push({
-      code: 'NO_TYPING',
-      name: '직접 타이핑 없음',
-      score,
-      category: 'behavior',
-    });
-  } else if (signals.typingSpeedCps > 5) {
-    // 비정상적으로 빠른 타이핑
-    const score = RISK_WEIGHTS.BEHAVIOR.FAST_TYPING;
-    behaviorScore += score;
-    appliedFactors.push({
-      code: 'FAST_TYPING',
-      name: '비정상적으로 빠른 타이핑',
-      score,
-      category: 'behavior',
-    });
-  }
+    // 2. 타이핑 속도 분석
+    if (signals.typingSpeedCps === 0 && text.length > 0) {
+      // 타이핑 없음 (전부 붙여넣기)
+      const score = RISK_WEIGHTS.BEHAVIOR.NO_TYPING;
+      behaviorScore += score;
+      appliedFactors.push({
+        code: 'NO_TYPING',
+        name: '직접 타이핑 없음',
+        score,
+        category: 'behavior',
+      });
+    } else if (signals.typingSpeedCps > 5) {
+      // 비정상적으로 빠른 타이핑
+      const score = RISK_WEIGHTS.BEHAVIOR.FAST_TYPING;
+      behaviorScore += score;
+      appliedFactors.push({
+        code: 'FAST_TYPING',
+        name: '비정상적으로 빠른 타이핑',
+        score,
+        category: 'behavior',
+      });
+    }
 
-  // 3. 수정 없이 입력
-  if (signals.backspaceCount === 0 && text.length > 10 && !signals.wasPasted) {
-    const score = RISK_WEIGHTS.BEHAVIOR.NO_CORRECTION;
-    behaviorScore += score;
-    appliedFactors.push({
-      code: 'NO_CORRECTION',
-      name: '수정 없이 완벽한 입력',
-      score,
-      category: 'behavior',
-    });
-  }
+    // 3. 수정 없이 입력
+    if (signals.backspaceCount === 0 && text.length > 10 && !signals.wasPasted) {
+      const score = RISK_WEIGHTS.BEHAVIOR.NO_CORRECTION;
+      behaviorScore += score;
+      appliedFactors.push({
+        code: 'NO_CORRECTION',
+        name: '수정 없이 완벽한 입력',
+        score,
+        category: 'behavior',
+      });
+    }
 
-  // 4. 머뭇거림 감지 (보이스피싱 핵심 지표)
-  // 3회 이상은 "스트레스 터치" - 전화 지시를 받으며 입력하는 강력한 패턴
-  if (signals.hesitationCount >= 3) {
-    const score = RISK_WEIGHTS.BEHAVIOR.STRESS_TOUCH;
-    behaviorScore += score;
-    appliedFactors.push({
-      code: 'STRESS_TOUCH',
-      name: `스트레스 터치 감지: ${signals.hesitationCount}회 반복적 멈칫거림 (보이스피싱 강력 의심)`,
-      score,
-      category: 'behavior',
-    });
-  } else if (signals.hesitationCount >= 1) {
-    const score = RISK_WEIGHTS.BEHAVIOR.FREQUENT_HESITATION;
-    behaviorScore += score;
-    appliedFactors.push({
-      code: 'FREQUENT_HESITATION',
-      name: `입력 중 ${signals.hesitationCount}회 멈칫거림 (보이스피싱 의심)`,
-      score,
-      category: 'behavior',
-    });
-  }
+    // 4. 머뭇거림 감지 (보이스피싱 핵심 지표)
+    // 3회 이상은 "스트레스 터치" - 전화 지시를 받으며 입력하는 강력한 패턴
+    if (signals.hesitationCount >= 3) {
+      const score = RISK_WEIGHTS.BEHAVIOR.STRESS_TOUCH;
+      behaviorScore += score;
+      appliedFactors.push({
+        code: 'STRESS_TOUCH',
+        name: `스트레스 터치 감지: ${signals.hesitationCount}회 반복적 멈칫거림 (보이스피싱 강력 의심)`,
+        score,
+        category: 'behavior',
+      });
+    } else if (signals.hesitationCount >= 1) {
+      const score = RISK_WEIGHTS.BEHAVIOR.FREQUENT_HESITATION;
+      behaviorScore += score;
+      appliedFactors.push({
+        code: 'FREQUENT_HESITATION',
+        name: `입력 중 ${signals.hesitationCount}회 멈칫거림 (보이스피싱 의심)`,
+        score,
+        category: 'behavior',
+      });
+    }
 
-  // 5. 반복적인 수정 패턴 (NEW)
-  if (signals.eraseInputRatio > 0.3 && signals.backspaceCount > 5) {
-    const score = RISK_WEIGHTS.BEHAVIOR.REPEATED_CORRECTIONS;
-    behaviorScore += score;
-    appliedFactors.push({
-      code: 'REPEATED_CORRECTIONS',
-      name: `반복적인 수정 (${Math.round(signals.eraseInputRatio * 100)}%)`,
-      score,
-      category: 'behavior',
-    });
-  }
+    // 5. 반복적인 수정 패턴
+    if (signals.eraseInputRatio > 0.3 && signals.backspaceCount > 5) {
+      const score = RISK_WEIGHTS.BEHAVIOR.REPEATED_CORRECTIONS;
+      behaviorScore += score;
+      appliedFactors.push({
+        code: 'REPEATED_CORRECTIONS',
+        name: `반복적인 수정 (${Math.round(signals.eraseInputRatio * 100)}%)`,
+        score,
+        category: 'behavior',
+      });
+    }
 
-  // 6. 느린 타이핑 (지시 받는 패턴) (NEW)
-  if (signals.avgTypingInterval > 1000 && signals.avgTypingInterval < 10000) {
-    const score = RISK_WEIGHTS.BEHAVIOR.SLOW_DELIBERATE_TYPING;
-    behaviorScore += score;
-    appliedFactors.push({
-      code: 'SLOW_DELIBERATE_TYPING',
-      name: `느린 타이핑 (평균 ${(signals.avgTypingInterval / 1000).toFixed(1)}초 간격)`,
-      score,
-      category: 'behavior',
-    });
-  }
+    // 6. 느린 타이핑 (지시 받는 패턴)
+    if (signals.avgTypingInterval > 1000 && signals.avgTypingInterval < 10000) {
+      const score = RISK_WEIGHTS.BEHAVIOR.SLOW_DELIBERATE_TYPING;
+      behaviorScore += score;
+      appliedFactors.push({
+        code: 'SLOW_DELIBERATE_TYPING',
+        name: `느린 타이핑 (평균 ${(signals.avgTypingInterval / 1000).toFixed(1)}초 간격)`,
+        score,
+        category: 'behavior',
+      });
+    }
 
-  // 7. 잦은 포커스 변경
-  if (signals.focusBlurCount > 5) {
-    const score = RISK_WEIGHTS.BEHAVIOR.FREQUENT_FOCUS_CHANGE;
-    behaviorScore += score;
-    appliedFactors.push({
-      code: 'FREQUENT_FOCUS_CHANGE',
-      name: `${signals.focusBlurCount}회 포커스 변경`,
-      score,
-      category: 'behavior',
-    });
-  }
+    // 7. 잦은 포커스 변경
+    if (signals.focusBlurCount > 5) {
+      const score = RISK_WEIGHTS.BEHAVIOR.FREQUENT_FOCUS_CHANGE;
+      behaviorScore += score;
+      appliedFactors.push({
+        code: 'FREQUENT_FOCUS_CHANGE',
+        name: `${signals.focusBlurCount}회 포커스 변경`,
+        score,
+        category: 'behavior',
+      });
+    }
 
-  // 8. 짧은 시간에 긴 텍스트
-  if (signals.durationMs > 0) {
+    // 8. 짧은 시간에 긴 텍스트
     const charsPerSecond = text.length / (signals.durationMs / 1000);
     if (charsPerSecond > 10 && text.length > 20) {
       const score = RISK_WEIGHTS.BEHAVIOR.FAST_INPUT_VS_DURATION;

@@ -42,7 +42,6 @@ export class BehaviorTracker {
   private focusBlurCount: number = 0;
   private fieldHops: number = 0;
   private wasPasted: boolean = false;
-  private previousLength: number = 0;
 
   constructor(options: BehaviorTrackerOptions) {
     this.element = options.inputElement;
@@ -128,18 +127,10 @@ export class BehaviorTracker {
   };
 
   /**
-   * 입력 이벤트 핸들러 (필드 간 이동 감지)
+   * 입력 이벤트 핸들러
+   * 참고: 붙여넣기는 paste 이벤트에서만 감지 (input 이벤트에서 길이 변화로 추론하지 않음)
    */
   private handleInput = (): void => {
-    const currentLength = this.element.value.length;
-
-    // 큰 변화 감지 (복사/붙여넣기 또는 자동완성)
-    const lengthDiff = Math.abs(currentLength - this.previousLength);
-    if (lengthDiff > 5) {
-      this.wasPasted = true;
-    }
-
-    this.previousLength = currentLength;
     this.notifyUpdate();
   };
 
@@ -229,7 +220,6 @@ export class BehaviorTracker {
     this.focusBlurCount = 0;
     this.fieldHops = 0;
     this.wasPasted = false;
-    this.previousLength = 0;
   }
 
   /**

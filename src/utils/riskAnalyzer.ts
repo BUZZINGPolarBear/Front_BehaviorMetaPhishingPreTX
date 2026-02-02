@@ -72,9 +72,9 @@ export function calculateRiskScore(request: AnalyzeRequest): number {
     score += 25;
   }
 
-  // 고액 거래 (100만원 이상) (20점)
+  // 고액 거래 (100만원 이상) (30점)
   if (textAnalysis.amount && textAnalysis.amount >= 1000000) {
-    score += 20;
+    score += 30;
   }
 
   // 계좌번호 포함 (10점)

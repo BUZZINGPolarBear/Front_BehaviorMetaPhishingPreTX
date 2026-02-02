@@ -42,7 +42,7 @@ export function TransferScreen() {
   const [showSamples, setShowSamples] = useState(true); // 샘플 메시지 표시 여부
 
   const accountInputRef = useRef<HTMLInputElement>(null);
-  const { getSignals } = useBehaviorTracker(accountInputRef);
+  const { getSignals, reset: resetTracker } = useBehaviorTracker(accountInputRef);
 
   // 페이지 전환 시 스크롤 최상단으로 이동
   useEffect(() => {
@@ -52,11 +52,14 @@ export function TransferScreen() {
   // 샘플 메시지 적용
   const handleSampleSelect = async (sample: SampleMessage) => {
     setShowSamples(false); // 샘플 선택 후 숨기기
-    await processMessage(sample.message);
+    // 샘플 선택 시에는 tracker 리셋 후 샘플용 신호로 분석
+    resetTracker();
+    await processMessage(sample.message, true); // isSampleSelect = true
   };
 
   // 메시지 처리 (붙여넣기 또는 샘플)
-  const processMessage = async (text: string) => {
+  // isSampleSelect: 샘플 버튼 클릭으로 선택한 경우 true (행위 분석 제외)
+  const processMessage = async (text: string, isSampleSelect: boolean = false) => {
 
     // 1. 원본 메시지 저장 (위에 표시용)
     setOriginalMessage(text);
@@ -75,7 +78,20 @@ export function TransferScreen() {
 
     // 4. 위험도 분석 (로컬 + 백엔드 병렬 처리)
     setIsAnalyzing(true);
-    const signals = getSignals();
+
+    // 샘플 선택 시에는 행위 신호 없이 빈 신호 사용 (텍스트 내용만 분석)
+    const signals = isSampleSelect ? {
+      wasPasted: false,
+      typingSpeedCps: 0,
+      backspaceCount: 0,
+      focusBlurCount: 0,
+      fieldHops: 0,
+      durationMs: 0,
+      hesitationCount: 0,
+      avgTypingInterval: 0,
+      maxTypingInterval: 0,
+      eraseInputRatio: 0,
+    } : getSignals();
 
     if (signals) {
       try {
