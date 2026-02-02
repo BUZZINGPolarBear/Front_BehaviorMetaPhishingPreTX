@@ -6,6 +6,9 @@
   min-height: 100vh;
   background: linear-gradient(180deg, #FEE2E2 0%, #FFFFFF 30%);
   padding-bottom: 200px;
+  max-width: 480px;
+  margin: 0 auto;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
 }
 
 /* 헤더 */
@@ -423,8 +426,10 @@
 .action-buttons {
   position: fixed;
   bottom: 0;
-  left: 0;
-  right: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 480px;
   padding: 16px 20px;
   background: white;
   border-top: 1px solid #E5E7EB;
@@ -432,6 +437,7 @@
   flex-direction: column;
   gap: 10px;
   z-index: 100;
+  box-sizing: border-box;
 }
 
 .call-button {
