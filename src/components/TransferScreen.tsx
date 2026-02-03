@@ -13,13 +13,13 @@ import { RiskBanner } from './RiskBanner';
 import { PhishingWarningScreen } from './PhishingWarningScreen';
 import './TransferScreen.css';
 
-// 가명화된 자주 보낸 사람 데이터
+// 가명화된 자주 보낸 사람 데이터 (존재하지 않는 계좌번호)
 const FREQUENT_CONTACTS = [
-  { id: 1, name: '김민수', bank: '스타라이트', account: '96904420004025', date: '2026.01.22', favorite: true },
-  { id: 2, name: '이지은', bank: '오션뱅크', account: '010-28-23037-2', date: '2025.12.20', favorite: true },
-  { id: 3, name: '박서준', bank: '오션뱅크', account: '382-910536-99907', date: '2025.12.20', favorite: true },
-  { id: 4, name: '최유진', bank: '그린필드', account: '35107498278', date: '2025.11.25', favorite: true },
-  { id: 5, name: '정다은', bank: '오션증권', account: '40093804300', date: '2025.08.25', favorite: true },
+  { id: 1, name: '김민수', bank: '스타라이트', account: '111-222-333333', date: '2026.01.22', favorite: true },
+  { id: 2, name: '이지은', bank: '오션뱅크', account: '123-12-341234', date: '2025.12.20', favorite: true },
+  { id: 3, name: '박서준', bank: '오션뱅크', account: '111-333-555777', date: '2025.12.20', favorite: true },
+  { id: 4, name: '최유진', bank: '그린필드', account: '222-444-666888', date: '2025.11.25', favorite: true },
+  { id: 5, name: '정다은', bank: '오션증권', account: '555-666-777777', date: '2025.08.25', favorite: true },
 ];
 
 type Step = 'select' | 'warning' | 'amount';
