@@ -58,6 +58,15 @@ export function TransferScreen() {
     await processMessage(sample.message, true, sample.expectedRisk);
   };
 
+  // 텍스트가 샘플 메시지와 일치하는지 확인
+  const findMatchingSample = (text: string): SampleMessage | undefined => {
+    const normalizedText = text.trim().replace(/\r\n/g, '\n');
+    return SAMPLE_MESSAGES.find(sample => {
+      const normalizedSample = sample.message.trim().replace(/\r\n/g, '\n');
+      return normalizedText === normalizedSample;
+    });
+  };
+
   // 메시지 처리 (붙여넣기 또는 샘플)
   // isSampleSelect: 샘플 버튼 클릭으로 선택한 경우 true (행위 분석 제외)
   // sampleExpectedRisk: 샘플의 예상 위험도 (샘플 선택 시에만 사용)
@@ -82,11 +91,17 @@ export function TransferScreen() {
       setAccountInput(text);
     }
 
+    // 붙여넣기된 텍스트가 샘플 메시지와 일치하는지 확인
+    // 일치하면 샘플 선택과 동일하게 처리 (테스트 목적)
+    const matchingSample = !isSampleSelect ? findMatchingSample(text) : undefined;
+    const effectiveIsSampleSelect = isSampleSelect || !!matchingSample;
+    const effectiveExpectedRisk = sampleExpectedRisk || matchingSample?.expectedRisk;
+
     // 4. 위험도 분석 (로컬 + 백엔드 병렬 처리)
     setIsAnalyzing(true);
 
-    // 샘플 선택 시에는 행위 신호 없이 빈 신호 사용 (텍스트 내용만 분석)
-    const signals = isSampleSelect ? {
+    // 샘플 메시지인 경우 행위 신호 없이 빈 신호 사용 (텍스트 내용만 분석)
+    const signals = effectiveIsSampleSelect ? {
       wasPasted: false,
       typingSpeedCps: 0,
       backspaceCount: 0,
@@ -124,14 +139,17 @@ export function TransferScreen() {
         let finalRiskLevel = localResult.riskLevel;
         let finalRiskScore = localResult.riskScore;
 
-        // 샘플 선택 시: expectedRisk를 우선 사용 (테스트 목적)
-        if (isSampleSelect && sampleExpectedRisk) {
-          finalRiskLevel = sampleExpectedRisk;
+        // 샘플 메시지인 경우: expectedRisk를 우선 사용 (테스트 목적)
+        if (effectiveIsSampleSelect && effectiveExpectedRisk) {
+          finalRiskLevel = effectiveExpectedRisk;
           // expectedRisk에 맞는 점수 설정
-          if (sampleExpectedRisk === 'high') {
+          if (effectiveExpectedRisk === 'high') {
             finalRiskScore = Math.max(localResult.riskScore, 80);
-          } else if (sampleExpectedRisk === 'medium') {
+          } else if (effectiveExpectedRisk === 'medium') {
             finalRiskScore = Math.max(localResult.riskScore, 50);
+          } else {
+            // low인 경우 점수 제한
+            finalRiskScore = Math.min(localResult.riskScore, 30);
           }
           // 분석 결과 업데이트
           const updatedAnalysis = {
