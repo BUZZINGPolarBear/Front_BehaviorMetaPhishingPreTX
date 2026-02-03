@@ -1,13 +1,15 @@
 /**
  * 샘플 메시지 선택 UI
+ * 다크 모드 테마
  */
 
 .sample-messages-section {
   margin-bottom: var(--space-6);
   padding: var(--space-4);
-  background: linear-gradient(135deg, #F0F2FF, #F5F3FF);
-  border-radius: 16px;
-  border: 1.5px solid var(--primary-indigo);
+  background: var(--card);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--primary);
+  box-shadow: var(--shadow-glow-primary);
 }
 
 .sample-header {
@@ -20,22 +22,23 @@
 .sample-title {
   font-size: var(--text-base);
   font-weight: var(--font-bold);
-  color: var(--primary-indigo);
+  color: var(--primary-light);
 }
 
 .sample-close {
   background: none;
   border: none;
   font-size: var(--text-lg);
-  color: var(--gray-500);
+  color: var(--foreground-muted);
   cursor: pointer;
   padding: var(--space-1);
   min-width: 32px;
   min-height: 32px;
+  transition: color var(--duration-fast) var(--ease-out);
 }
 
 .sample-close:hover {
-  color: var(--gray-700);
+  color: var(--foreground);
 }
 
 /* 카테고리 */
@@ -53,7 +56,7 @@
   gap: var(--space-2);
   font-size: var(--text-sm);
   font-weight: var(--font-semibold);
-  color: var(--gray-700);
+  color: var(--foreground);
   margin-bottom: var(--space-2);
 }
 
@@ -63,7 +66,7 @@
 }
 
 .category-icon.safe {
-  color: var(--success);
+  color: var(--safe);
 }
 
 .category-icon.suspicious {
@@ -71,7 +74,7 @@
 }
 
 .category-icon.dangerous {
-  color: var(--error);
+  color: var(--danger);
 }
 
 /* 샘플 버튼 */
@@ -84,9 +87,9 @@
 .sample-button {
   width: 100%;
   padding: var(--space-3);
-  background: white;
-  border: 1.5px solid var(--gray-300);
-  border-radius: 12px;
+  background: var(--secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
   text-align: left;
   cursor: pointer;
   transition: all var(--duration-base) var(--ease-out);
@@ -95,65 +98,48 @@
 
 .sample-button:hover {
   transform: translateX(4px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-md);
 }
 
 .sample-button.safe {
-  border-color: var(--success);
+  border-color: rgba(34, 197, 94, 0.5);
 }
 
 .sample-button.safe:hover {
-  background: #D1FAE5;
-  border-color: var(--success);
+  background: var(--safe-bg);
+  border-color: var(--safe);
+  box-shadow: var(--shadow-glow-safe);
 }
 
 .sample-button.suspicious {
-  border-color: var(--warning);
+  border-color: rgba(245, 158, 11, 0.5);
 }
 
 .sample-button.suspicious:hover {
-  background: #FEF3C7;
+  background: var(--warning-bg);
   border-color: var(--warning);
 }
 
 .sample-button.dangerous {
-  border-color: var(--error);
+  border-color: rgba(239, 68, 68, 0.5);
 }
 
 .sample-button.dangerous:hover {
-  background: #FEE2E2;
-  border-color: var(--error);
+  background: var(--danger-bg);
+  border-color: var(--danger);
+  box-shadow: var(--shadow-glow-danger);
 }
 
 .sample-button-title {
   font-size: var(--text-sm);
   font-weight: var(--font-semibold);
-  color: var(--gray-900);
+  color: var(--foreground);
   margin-bottom: 2px;
 }
 
 .sample-button-desc {
   font-size: var(--text-xs);
-  color: var(--gray-500);
-}
-
-/* 다시 선택하기 버튼 */
-.reset-button {
-  margin-top: var(--space-2);
-  padding: var(--space-2) var(--space-3);
-  background: white;
-  border: 1.5px solid var(--gray-300);
-  border-radius: 8px;
-  font-size: var(--text-xs);
-  font-weight: var(--font-medium);
-  color: var(--gray-700);
-  cursor: pointer;
-  transition: all var(--duration-fast) var(--ease-out);
-}
-
-.reset-button:hover {
-  border-color: var(--primary-indigo);
-  color: var(--primary-indigo);
+  color: var(--foreground-muted);
 }
 
 /* 반응형 */

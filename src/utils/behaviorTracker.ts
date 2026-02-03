@@ -6,6 +6,9 @@
 import { useRef, useEffect, useCallback, type RefObject } from "react";
 import type { InputSignals } from "../types/api";
 
+// BehaviorSignals는 InputSignals와 동일한 타입 (외부에서 사용하기 쉽도록 별칭 제공)
+export type BehaviorSignals = InputSignals;
+
 export interface BehaviorTrackerOptions {
   /** 추적할 입력 필드 */
   inputElement: HTMLInputElement | HTMLTextAreaElement;

@@ -14,8 +14,8 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: var(--gray-50);
-  color: var(--gray-900);
+  background: var(--background);
+  color: var(--foreground);
   line-height: var(--leading-normal);
   font-size: var(--text-base);
 }
@@ -28,28 +28,36 @@ body {
 h1, h2, h3, h4, h5, h6 {
   font-weight: 600;
   line-height: 1.25;
+  color: var(--foreground);
 }
 
 /* Utilities */
 .app {
   min-height: 100vh;
+  background: var(--background);
 }
 
-/* Scrollbar */
+/* Scrollbar - Dark Theme */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #F3F4F6;
+  background: var(--background-secondary);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #D1D5DB;
+  background: var(--gray-600);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #9CA3AF;
+  background: var(--gray-500);
+}
+
+/* Selection */
+::selection {
+  background: var(--primary);
+  color: var(--primary-foreground);
 }

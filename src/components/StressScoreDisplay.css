@@ -1,0 +1,171 @@
+/**
+ * 실시간 스트레스 점수 표시 컴포넌트 스타일
+ * 다크 모드 테마
+ */
+
+.stress-score-display {
+  margin: var(--space-4);
+  padding: var(--space-4);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  animation: fadeIn var(--duration-base) var(--ease-out);
+}
+
+.stress-score-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-3);
+}
+
+.stress-score-title {
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--foreground-muted);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.stress-pulse {
+  width: 8px;
+  height: 8px;
+  background: var(--primary);
+  border-radius: 50%;
+  animation: pulse 1.5s var(--ease-in-out) infinite;
+}
+
+.stress-score-value {
+  font-size: var(--text-2xl);
+  font-weight: var(--font-bold);
+  font-family: 'Courier New', monospace;
+  transition: all var(--duration-base) var(--ease-out);
+}
+
+.stress-score-value.safe {
+  color: var(--safe);
+  text-shadow: 0 0 15px rgba(34, 197, 94, 0.4);
+}
+
+.stress-score-value.warning {
+  color: var(--warning);
+  text-shadow: 0 0 15px rgba(245, 158, 11, 0.4);
+}
+
+.stress-score-value.danger {
+  color: var(--danger);
+  text-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+  animation: scoreGlow 1s var(--ease-in-out) infinite;
+}
+
+.stress-score-unit {
+  font-size: var(--text-sm);
+  color: var(--foreground-muted);
+  font-weight: var(--font-medium);
+  margin-left: 2px;
+}
+
+@keyframes scoreGlow {
+  0%, 100% {
+    text-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+  }
+  50% {
+    text-shadow: 0 0 25px rgba(239, 68, 68, 0.6);
+  }
+}
+
+/* 프로그레스 바 */
+.stress-progress-bar {
+  width: 100%;
+  height: 8px;
+  background: var(--secondary);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  margin-bottom: var(--space-3);
+}
+
+.stress-progress-fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  transition: width var(--duration-base) var(--ease-out),
+              background var(--duration-base) var(--ease-out);
+}
+
+.stress-progress-fill.safe {
+  background: var(--gradient-safe);
+}
+
+.stress-progress-fill.warning {
+  background: var(--warning);
+}
+
+.stress-progress-fill.danger {
+  background: var(--gradient-danger);
+  animation: progressPulse 1.5s var(--ease-in-out) infinite;
+}
+
+@keyframes progressPulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* 스트레스 요소 태그 */
+.stress-factors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.stress-factor {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  background: var(--secondary);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-xs);
+  color: var(--foreground-muted);
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.stress-factor.active {
+  background: var(--danger-bg);
+  color: var(--danger-foreground);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  animation: factorAppear var(--duration-base) var(--ease-spring);
+}
+
+@keyframes factorAppear {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.factor-badge {
+  font-weight: var(--font-bold);
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  background: rgba(239, 68, 68, 0.2);
+  padding: 1px 4px;
+  border-radius: 4px;
+}
+
+/* 힌트 메시지 */
+.stress-hint {
+  font-size: var(--text-xs);
+  color: var(--foreground-muted);
+  text-align: center;
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--border);
+}

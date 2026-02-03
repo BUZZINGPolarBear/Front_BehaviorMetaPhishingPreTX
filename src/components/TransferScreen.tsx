@@ -4,13 +4,14 @@
  */
 
 import { useState, useRef, useEffect } from 'react';
-import { useBehaviorTracker } from '../utils/behaviorTracker';
+import { useBehaviorTracker, type BehaviorSignals } from '../utils/behaviorTracker';
 import { analyzeText, matchPhishing } from '../services/apiClient';
 import { parseTransferMessage } from '../utils/messageParser';
 import { SAMPLE_MESSAGES, type SampleMessage } from '../data/sampleMessages';
 import type { AnalyzeResponse, MatchResponse } from '../types/api';
 import { RiskBanner } from './RiskBanner';
 import { PhishingWarningScreen } from './PhishingWarningScreen';
+import { StressScoreDisplay } from './StressScoreDisplay';
 import './TransferScreen.css';
 
 // 가명화된 자주 보낸 사람 데이터 (존재하지 않는 계좌번호)
@@ -40,9 +41,25 @@ export function TransferScreen() {
   const [matchResult, setMatchResult] = useState<MatchResponse | null>(null); // 백엔드 유사도 매칭 결과
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [showSamples, setShowSamples] = useState(true); // 샘플 메시지 표시 여부
+  const [isDirectTyping, setIsDirectTyping] = useState(false); // 직접 타이핑 중 여부
+  const [realtimeSignals, setRealtimeSignals] = useState<BehaviorSignals | null>(null); // 실시간 신호
 
   const accountInputRef = useRef<HTMLInputElement>(null);
   const { getSignals, reset: resetTracker } = useBehaviorTracker(accountInputRef);
+
+  // 실시간 신호 업데이트 (직접 타이핑 중일 때만)
+  useEffect(() => {
+    if (!isDirectTyping) return;
+
+    const updateInterval = setInterval(() => {
+      const signals = getSignals();
+      if (signals) {
+        setRealtimeSignals({ ...signals });
+      }
+    }, 200); // 200ms마다 업데이트
+
+    return () => clearInterval(updateInterval);
+  }, [isDirectTyping, getSignals]);
 
   // 페이지 전환 시 스크롤 최상단으로 이동
   useEffect(() => {
@@ -52,6 +69,8 @@ export function TransferScreen() {
   // 샘플 메시지 적용
   const handleSampleSelect = async (sample: SampleMessage) => {
     setShowSamples(false); // 샘플 선택 후 숨기기
+    setIsDirectTyping(false); // 샘플 선택은 직접 타이핑이 아님
+    setRealtimeSignals(null);
     // 샘플 선택 시에는 tracker 리셋 후 샘플용 신호로 분석
     resetTracker();
     // 샘플의 expectedRisk를 전달하여 의도된 대로 동작하도록 함
@@ -215,7 +234,24 @@ export function TransferScreen() {
     e.preventDefault(); // 기본 붙여넣기 동작 방지
     const text = e.clipboardData.getData('text');
     setShowSamples(false); // 붙여넣기 시 샘플 숨기기
+    setIsDirectTyping(false); // 붙여넣기는 직접 타이핑이 아님
+    setRealtimeSignals(null);
     await processMessage(text);
+  };
+
+  // 계좌번호 입력 변경 핸들러 (직접 타이핑 감지)
+  const handleAccountInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value;
+    setAccountInput(newValue);
+
+    // 직접 타이핑 시작 감지 (샘플이 아닌 경우)
+    if (newValue.length > 0 && !originalMessage) {
+      setIsDirectTyping(true);
+      setShowSamples(false);
+    } else if (newValue.length === 0) {
+      setIsDirectTyping(false);
+      setRealtimeSignals(null);
+    }
   };
 
   // 연락처 선택
@@ -322,6 +358,10 @@ export function TransferScreen() {
       setIsAnalyzing(false);
     }
 
+    // 분석 완료 후 직접 타이핑 상태 초기화
+    setIsDirectTyping(false);
+    setRealtimeSignals(null);
+
     // 고위험이 아닌 경우만 금액 입력으로 이동
     if (riskAnalysis?.riskLevel === 'high') {
       setStep('warning');
@@ -380,6 +420,9 @@ export function TransferScreen() {
           setShowSamples(true);
           setSelectedContact(null);
           setAmount('');
+          setIsDirectTyping(false);
+          setRealtimeSignals(null);
+          resetTracker();
         }}
       />
     );
@@ -494,6 +537,9 @@ export function TransferScreen() {
                   setRiskAnalysis(null);
                   setMatchResult(null);
                   setShowSamples(true);
+                  setIsDirectTyping(false);
+                  setRealtimeSignals(null);
+                  resetTracker();
                 }}
               >
                 다시 선택하기
@@ -509,7 +555,7 @@ export function TransferScreen() {
               placeholder="계좌번호 입력 (메시지 붙여넣기 가능)"
               className="search-input"
               value={accountInput}
-              onChange={(e) => setAccountInput(e.target.value)}
+              onChange={handleAccountInputChange}
               onPaste={handleAccountPaste}
               onKeyPress={(e) => {
                 if (e.key === 'Enter') {
@@ -525,6 +571,14 @@ export function TransferScreen() {
               {isAnalyzing ? '...' : '송금'}
             </button>
           </div>
+
+          {/* 실시간 스트레스 점수 표시 (직접 타이핑 중일 때) */}
+          {isDirectTyping && !originalMessage && (
+            <StressScoreDisplay
+              signals={realtimeSignals}
+              isTyping={isDirectTyping}
+            />
+          )}
 
           {/* 분석 중 표시 */}
           {isAnalyzing && (

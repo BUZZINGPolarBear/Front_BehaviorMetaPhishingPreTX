@@ -1,14 +1,14 @@
 /**
  * 위험도 배너 스타일
- * Calm Security 원칙 - 불안 유발하지 않고 명확하게
+ * 다크 모드 테마 - Calm Security 원칙
  */
 
 .risk-banner {
   margin: var(--space-4);
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   overflow: hidden;
   transition: all var(--duration-base) var(--ease-out);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-md);
   animation: slideDown var(--duration-base) var(--ease-out);
 }
 
@@ -23,20 +23,20 @@
   }
 }
 
-/* 위험도별 색상 */
+/* 위험도별 색상 - 다크 모드 */
 .risk-banner.risk-low {
-  background: linear-gradient(135deg, #D1FAE5, #A7F3D0);
-  border: 1.5px solid #10B981;
+  background: var(--safe-bg);
+  border: 1px solid var(--safe);
 }
 
 .risk-banner.risk-medium {
-  background: linear-gradient(135deg, #FEF3C7, #FDE68A);
-  border: 1.5px solid #F59E0B;
+  background: var(--warning-bg);
+  border: 1px solid var(--warning);
 }
 
 .risk-banner.risk-high {
-  background: linear-gradient(135deg, #FEE2E2, #FECACA);
-  border: 1.5px solid #EF4444;
+  background: var(--danger-bg);
+  border: 1px solid var(--danger);
 }
 
 /* 메인 영역 */
@@ -70,21 +70,21 @@
 }
 
 .risk-low .risk-icon {
-  color: #059669;
+  color: var(--safe);
 }
 
 .risk-medium .risk-icon {
-  color: #D97706;
+  color: var(--warning);
 }
 
 .risk-high .risk-icon {
-  color: #DC2626;
+  color: var(--danger);
 }
 
 .risk-message {
   font-size: var(--text-base);
   font-weight: var(--font-semibold);
-  color: var(--gray-900);
+  color: var(--foreground);
 }
 
 .risk-score-display {
@@ -100,26 +100,29 @@
 }
 
 .risk-score.score-low {
-  color: #059669;
+  color: var(--safe);
+  text-shadow: 0 0 10px rgba(34, 197, 94, 0.3);
 }
 
 .risk-score.score-medium {
-  color: #D97706;
+  color: var(--warning);
+  text-shadow: 0 0 10px rgba(245, 158, 11, 0.3);
 }
 
 .risk-score.score-high {
-  color: #DC2626;
+  color: var(--danger);
+  text-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
 }
 
 .risk-score-max {
   font-size: var(--text-sm);
-  color: var(--gray-500);
+  color: var(--foreground-muted);
   font-weight: var(--font-medium);
 }
 
 .risk-toggle {
   font-size: var(--text-sm);
-  color: var(--gray-700);
+  color: var(--foreground-muted);
   font-weight: var(--font-medium);
   flex-shrink: 0;
 }
@@ -133,14 +136,15 @@
 .risk-section {
   margin-top: var(--space-4);
   padding: var(--space-4);
-  background: rgba(255, 255, 255, 0.7);
-  border-radius: 12px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
 }
 
 .risk-section-title {
   font-size: var(--text-sm);
   font-weight: var(--font-semibold);
-  color: var(--gray-700);
+  color: var(--foreground);
   margin-bottom: var(--space-2);
 }
 
@@ -154,7 +158,7 @@
 .risk-reason-item,
 .risk-recommendation-item {
   font-size: var(--text-sm);
-  color: var(--gray-700);
+  color: var(--foreground-muted);
   padding: var(--space-2) 0;
   padding-left: var(--space-4);
   position: relative;
@@ -167,7 +171,7 @@
   position: absolute;
   left: 0;
   font-weight: var(--font-bold);
-  color: var(--gray-500);
+  color: var(--foreground-muted);
 }
 
 /* 추가 검증 버튼 */
@@ -176,26 +180,24 @@
   margin-top: var(--space-4);
   padding: var(--space-4);
   border: none;
-  border-radius: 12px;
-  background: white;
+  border-radius: var(--radius-md);
+  background: var(--gradient-primary);
   font-size: var(--text-base);
   font-weight: var(--font-semibold);
-  color: var(--primary-indigo);
+  color: var(--primary-foreground);
   cursor: pointer;
   transition: all var(--duration-base) var(--ease-out);
   min-height: 48px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .verify-button:hover {
-  background: var(--gray-50);
   transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-glow-primary);
 }
 
 /* 펼쳐진 상태 */
 .risk-banner.expanded {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--shadow-lg);
 }
 
 /* 체크리스트 (Medium 레벨) */
@@ -210,27 +212,29 @@
   align-items: center;
   gap: var(--space-2);
   padding: var(--space-3);
-  background: white;
-  border-radius: 8px;
+  background: var(--secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
   cursor: pointer;
   transition: all var(--duration-fast) var(--ease-out);
   user-select: none;
 }
 
 .checklist-item:hover {
-  background: var(--gray-50);
+  background: var(--card);
+  border-color: var(--primary);
 }
 
 .checklist-item input[type="checkbox"] {
   width: 20px;
   height: 20px;
   cursor: pointer;
-  accent-color: var(--primary-indigo);
+  accent-color: var(--primary);
 }
 
 .checklist-item span {
   font-size: var(--text-sm);
-  color: var(--gray-700);
+  color: var(--foreground);
   line-height: var(--leading-relaxed);
 }
 
@@ -243,32 +247,32 @@
 
 .fraud-case {
   padding: var(--space-3);
-  background: white;
-  border-radius: 8px;
-  border-left: 3px solid #EF4444;
+  background: var(--secondary);
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--danger);
 }
 
 .fraud-case-title {
   font-size: var(--text-sm);
   font-weight: var(--font-semibold);
-  color: var(--gray-900);
+  color: var(--foreground);
   margin-bottom: var(--space-1);
 }
 
 .fraud-case-desc {
   font-size: var(--text-sm);
-  color: var(--gray-600);
+  color: var(--foreground-muted);
   line-height: var(--leading-relaxed);
   margin-bottom: var(--space-2);
 }
 
 .fraud-case-warning {
   font-size: var(--text-xs);
-  color: #DC2626;
+  color: var(--danger);
   font-weight: var(--font-medium);
-  background: #FEE2E2;
+  background: var(--danger-bg);
   padding: var(--space-2);
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
 }
 
 /* 스크린샷 업로드 (High 레벨) */
@@ -281,21 +285,21 @@
 .upload-button {
   width: 100%;
   padding: var(--space-4);
-  border: 2px dashed var(--gray-300);
-  border-radius: 12px;
-  background: white;
+  border: 2px dashed var(--border);
+  border-radius: var(--radius-md);
+  background: var(--secondary);
   font-size: var(--text-sm);
   font-weight: var(--font-medium);
-  color: var(--gray-700);
+  color: var(--foreground-muted);
   cursor: pointer;
   transition: all var(--duration-fast) var(--ease-out);
   min-height: 48px;
 }
 
 .upload-button:hover {
-  border-color: var(--primary-indigo);
-  background: var(--gray-50);
-  color: var(--primary-indigo);
+  border-color: var(--primary);
+  background: var(--card);
+  color: var(--primary-light);
 }
 
 .screenshot-info {
@@ -303,13 +307,14 @@
   align-items: center;
   justify-content: space-between;
   padding: var(--space-2) var(--space-3);
-  background: #DBEAFE;
-  border-radius: 8px;
+  background: rgba(99, 102, 241, 0.15);
+  border: 1px solid var(--primary);
+  border-radius: var(--radius-sm);
 }
 
 .screenshot-name {
   font-size: var(--text-sm);
-  color: var(--gray-700);
+  color: var(--foreground);
   flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -320,7 +325,7 @@
   background: none;
   border: none;
   font-size: 18px;
-  color: var(--gray-500);
+  color: var(--foreground-muted);
   cursor: pointer;
   padding: var(--space-1);
   line-height: 1;
@@ -328,12 +333,12 @@
 }
 
 .screenshot-remove:hover {
-  color: #DC2626;
+  color: var(--danger);
 }
 
 .upload-hint {
   font-size: var(--text-xs);
-  color: var(--gray-500);
+  color: var(--foreground-muted);
   line-height: var(--leading-relaxed);
   padding: 0 var(--space-2);
 }
@@ -351,20 +356,20 @@
   justify-content: space-between;
   align-items: center;
   padding: var(--space-2) var(--space-3);
-  background: white;
-  border-radius: 8px;
-  border: 1px solid var(--gray-200);
+  background: var(--secondary);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
 }
 
 .score-category-label {
   font-size: var(--text-xs);
-  color: var(--gray-600);
+  color: var(--foreground-muted);
   font-weight: var(--font-medium);
 }
 
 .score-category-value {
   font-size: var(--text-sm);
-  color: var(--gray-900);
+  color: var(--foreground);
   font-weight: var(--font-bold);
   font-family: 'Courier New', monospace;
 }
@@ -375,7 +380,7 @@
 
 .applied-factors-title {
   font-size: var(--text-xs);
-  color: var(--gray-600);
+  color: var(--foreground-muted);
   font-weight: var(--font-medium);
   margin-bottom: var(--space-2);
 }
@@ -385,31 +390,31 @@
   justify-content: space-between;
   align-items: center;
   padding: var(--space-2) var(--space-3);
-  background: white;
-  border-radius: 6px;
+  background: var(--secondary);
+  border-radius: var(--radius-sm);
   margin-bottom: var(--space-1);
   border-left: 3px solid;
 }
 
 .factor-item.factor-behavior {
-  border-left-color: #6366F1;
-  background: rgba(99, 102, 241, 0.05);
+  border-left-color: var(--primary);
+  background: rgba(99, 102, 241, 0.1);
 }
 
 .factor-item.factor-content {
-  border-left-color: #F59E0B;
-  background: rgba(245, 158, 11, 0.05);
+  border-left-color: var(--warning);
+  background: var(--warning-bg);
 }
 
 .factor-name {
   font-size: var(--text-sm);
-  color: var(--gray-700);
+  color: var(--foreground);
   flex: 1;
 }
 
 .factor-score {
   font-size: var(--text-sm);
-  color: var(--gray-900);
+  color: var(--foreground);
   font-weight: var(--font-bold);
   font-family: 'Courier New', monospace;
   margin-left: var(--space-2);
@@ -420,9 +425,9 @@
 /* ============================================ */
 
 .similarity-section {
-  background: linear-gradient(135deg, #FEF3C7, #FDE68A);
-  border: 2px solid #F59E0B;
-  border-radius: 12px;
+  background: var(--warning-bg);
+  border: 2px solid var(--warning);
+  border-radius: var(--radius-md);
   padding: 0;
   margin-top: 0;
 }
@@ -447,13 +452,13 @@
 
 .similarity-main-message {
   font-size: var(--text-base);
-  color: var(--gray-900);
+  color: var(--foreground);
   line-height: var(--leading-relaxed);
   font-weight: var(--font-medium);
 }
 
 .similarity-main-message strong {
-  color: #DC2626;
+  color: var(--danger);
   font-weight: var(--font-bold);
 }
 
@@ -462,35 +467,35 @@
   font-weight: var(--font-bold);
   font-family: 'Courier New', monospace;
   padding: 2px 8px;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
 }
 
 .similarity-percent.high {
-  background: #FEE2E2;
-  color: #DC2626;
+  background: var(--danger-bg);
+  color: var(--danger);
 }
 
 .similarity-percent.medium {
-  background: #FEF3C7;
-  color: #D97706;
+  background: var(--warning-bg);
+  color: var(--warning);
 }
 
 .similarity-percent.low {
-  background: #D1FAE5;
-  color: #059669;
+  background: var(--safe-bg);
+  color: var(--safe);
 }
 
 /* 유사 판단 근거 */
 .similarity-reasons {
-  background: rgba(255, 255, 255, 0.8);
-  border-radius: 8px;
+  background: var(--card);
+  border-radius: var(--radius-sm);
   padding: var(--space-3);
 }
 
 .similarity-reasons-title {
   font-size: var(--text-sm);
   font-weight: var(--font-semibold);
-  color: var(--gray-700);
+  color: var(--foreground);
   margin-bottom: var(--space-2);
 }
 
@@ -505,7 +510,7 @@
 
 .similarity-reasons-list li {
   font-size: var(--text-sm);
-  color: var(--gray-700);
+  color: var(--foreground-muted);
   padding-left: var(--space-4);
   position: relative;
   line-height: var(--leading-relaxed);
@@ -520,15 +525,15 @@
 
 /* 유사 사례 목록 */
 .similar-cases {
-  background: rgba(255, 255, 255, 0.8);
-  border-radius: 8px;
+  background: var(--card);
+  border-radius: var(--radius-sm);
   padding: var(--space-3);
 }
 
 .similar-cases-title {
   font-size: var(--text-sm);
   font-weight: var(--font-semibold);
-  color: var(--gray-700);
+  color: var(--foreground);
   margin-bottom: var(--space-2);
 }
 
@@ -543,25 +548,25 @@
   align-items: flex-start;
   gap: var(--space-2);
   padding: var(--space-2);
-  background: white;
-  border-radius: 6px;
-  border-left: 3px solid #F59E0B;
+  background: var(--secondary);
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--warning);
 }
 
 .case-similarity {
   font-size: var(--text-sm);
   font-weight: var(--font-bold);
   font-family: 'Courier New', monospace;
-  color: #D97706;
-  background: #FEF3C7;
+  color: var(--warning);
+  background: var(--warning-bg);
   padding: 2px 6px;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   flex-shrink: 0;
 }
 
 .case-summary {
   font-size: var(--text-sm);
-  color: var(--gray-700);
+  color: var(--foreground-muted);
   line-height: var(--leading-relaxed);
   flex: 1;
   overflow: hidden;
