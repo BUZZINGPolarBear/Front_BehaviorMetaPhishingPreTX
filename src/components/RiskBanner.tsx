@@ -114,8 +114,8 @@ export function RiskBanner({ analysis, matchResult }: RiskBannerProps) {
       {/* 상세 정보 (펼쳤을 때) */}
       {isExpanded && (
         <div className="risk-banner-details">
-          {/* 백엔드 유사도 매칭 결과 (가장 먼저 표시) */}
-          {matchResult && matchResult.top_match && (
+          {/* 백엔드 유사도 매칭 결과 (가장 먼저 표시, 안전한 거래는 제외) */}
+          {riskLevel !== 'low' && matchResult && matchResult.top_match && (
             <div className="risk-section similarity-section">
               <div className="similarity-alert">
                 <div className="similarity-icon">🔍</div>
