@@ -31,7 +31,11 @@ interface SelectedContact {
   account: string;
 }
 
-export function TransferScreen() {
+interface TransferScreenProps {
+  onBack: () => void;
+}
+
+export function TransferScreen({ onBack }: TransferScreenProps) {
   const [step, setStep] = useState<Step>('select');
   const [selectedContact, setSelectedContact] = useState<SelectedContact | null>(null);
   const [amount, setAmount] = useState('');
@@ -432,13 +436,11 @@ export function TransferScreen() {
     <div className="transfer-screen">
       {/* 상단 헤더 */}
       <header className="transfer-header">
-        {step === 'amount' && (
-          <button className="back-button" onClick={() => setStep('select')}>
-            ←
-          </button>
-        )}
-        <h1 className="transfer-title">이체</h1>
-        <button className="cancel-button">취소</button>
+        <button className="back-button" onClick={step === 'amount' ? () => setStep('select') : onBack}>
+          ←
+        </button>
+        <h1 className="transfer-title">송금하기</h1>
+        <button className="cancel-button" onClick={onBack}>취소</button>
       </header>
 
       {/* 위험도 배너 (송금창 위에 표시) */}
@@ -587,14 +589,6 @@ export function TransferScreen() {
               위험도 분석 중...
             </div>
           )}
-
-          {/* 탭 */}
-          <div className="tabs">
-            <button className="tab active">최근</button>
-            <button className="tab">내계좌</button>
-            <button className="tab">자주</button>
-            <button className="tab">연락처</button>
-          </div>
 
           {/* 자주 보낸 사람 리스트 */}
           <div className="contact-list">
