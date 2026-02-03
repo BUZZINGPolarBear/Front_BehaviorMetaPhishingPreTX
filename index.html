@@ -24,6 +24,70 @@
   </head>
   <body>
     <div id="root"></div>
+
+    <!-- 카카오톡/라인/인스타그램 등 인앱 브라우저 감지 및 외부 브라우저로 리다이렉트 -->
+    <script>
+      (function() {
+        var userAgent = navigator.userAgent || navigator.vendor || window.opera;
+
+        // 인앱 브라우저 감지 (카카오톡, 라인, 인스타그램, 페이스북 등)
+        var isKakao = /KAKAOTALK/i.test(userAgent);
+        var isLine = /Line\//i.test(userAgent);
+        var isInsta = /Instagram/i.test(userAgent);
+        var isFacebook = /FBAN|FBAV/i.test(userAgent);
+        var isInAppBrowser = isKakao || isLine || isInsta || isFacebook;
+
+        if (isInAppBrowser) {
+          var currentUrl = window.location.href;
+
+          // Android 감지
+          if (/android/i.test(userAgent)) {
+            // intent:// 스킴으로 Chrome에서 열기
+            var intentUrl = 'intent://' + currentUrl.replace(/https?:\/\//i, '') +
+              '#Intent;scheme=https;package=com.android.chrome;end';
+
+            // 대체 방법: 삼성 인터넷 브라우저
+            var samsungUrl = 'intent://' + currentUrl.replace(/https?:\/\//i, '') +
+              '#Intent;scheme=https;package=com.sec.android.app.sbrowser;end';
+
+            // Chrome으로 시도
+            location.href = intentUrl;
+
+            // 실패 시 안내 페이지 표시
+            setTimeout(function() {
+              document.body.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;padding:20px;text-align:center;font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#f5f5f5;">' +
+                '<div style="background:white;padding:30px;border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,0.1);max-width:400px;">' +
+                '<h2 style="margin:0 0 16px;color:#333;">외부 브라우저에서 열어주세요</h2>' +
+                '<p style="margin:0 0 20px;color:#666;line-height:1.6;">이 앱은 인앱 브라우저에서 정상적으로 동작하지 않습니다.<br>아래 버튼을 눌러 외부 브라우저에서 열어주세요.</p>' +
+                '<div style="display:flex;flex-direction:column;gap:10px;">' +
+                '<a href="' + intentUrl + '" style="display:block;padding:14px 24px;background:#4285f4;color:white;text-decoration:none;border-radius:8px;font-weight:600;">Chrome에서 열기</a>' +
+                '<a href="' + samsungUrl + '" style="display:block;padding:14px 24px;background:#1428a0;color:white;text-decoration:none;border-radius:8px;font-weight:600;">삼성 인터넷에서 열기</a>' +
+                '</div>' +
+                '<p style="margin:20px 0 0;font-size:12px;color:#999;">또는 우측 상단 메뉴(⋮)에서<br>"다른 브라우저로 열기"를 선택하세요</p>' +
+                '</div></div>';
+            }, 1000);
+          }
+          // iOS 감지
+          else if (/iPhone|iPad|iPod/i.test(userAgent)) {
+            // iOS에서는 직접 외부 브라우저로 열 수 없음 - 안내 메시지 표시
+            document.body.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;padding:20px;text-align:center;font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#f5f5f5;">' +
+              '<div style="background:white;padding:30px;border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,0.1);max-width:400px;">' +
+              '<h2 style="margin:0 0 16px;color:#333;">Safari에서 열어주세요</h2>' +
+              '<p style="margin:0 0 20px;color:#666;line-height:1.6;">이 앱은 인앱 브라우저에서 정상적으로 동작하지 않습니다.</p>' +
+              '<div style="background:#f8f9fa;padding:16px;border-radius:8px;text-align:left;">' +
+              '<p style="margin:0 0 12px;font-weight:600;color:#333;">Safari에서 여는 방법:</p>' +
+              '<ol style="margin:0;padding-left:20px;color:#666;line-height:1.8;">' +
+              '<li>우측 하단 <strong>⋯</strong> 또는 <strong>공유</strong> 버튼 탭</li>' +
+              '<li><strong>"Safari로 열기"</strong> 또는<br><strong>"기본 브라우저에서 열기"</strong> 선택</li>' +
+              '</ol>' +
+              '</div>' +
+              '<button onclick="navigator.clipboard.writeText(\'' + currentUrl + '\');this.textContent=\'복사됨!\';this.style.background=\'#28a745\';" style="margin-top:20px;padding:14px 24px;background:#007aff;color:white;border:none;border-radius:8px;font-weight:600;font-size:16px;cursor:pointer;width:100%;">URL 복사하기</button>' +
+              '</div></div>';
+          }
+        }
+      })();
+    </script>
+
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
