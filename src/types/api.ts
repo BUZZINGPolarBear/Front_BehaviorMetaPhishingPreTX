@@ -17,8 +17,10 @@ export interface InputSignals {
   typingSpeedCps: number;
   /** 백스페이스 횟수 */
   backspaceCount: number;
-  /** 포커스/블러 발생 횟수 */
+  /** 포커스/블러 발생 횟수 (입력 필드에서 포커스 벗어남) */
   focusBlurCount: number;
+  /** 화면 벗어남 횟수 (탭/앱 전환) */
+  visibilityChangeCount?: number;
   /** 필드 간 이동(탭/클릭) 횟수 */
   fieldHops: number;
   /** 입력에 소요된 총 시간 (밀리초) */

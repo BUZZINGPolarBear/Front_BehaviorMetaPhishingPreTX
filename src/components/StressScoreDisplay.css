@@ -59,6 +59,49 @@
   animation: scoreGlow 1s var(--ease-in-out) infinite;
 }
 
+.stress-score-value.phishing {
+  color: #ff1744;
+  text-shadow: 0 0 20px rgba(255, 23, 68, 0.6);
+  animation: phishingGlow 0.5s var(--ease-in-out) infinite;
+}
+
+/* 보이스피싱 의심 상태 */
+.stress-score-display.phishing-suspected {
+  border-color: #ff1744;
+  background: rgba(255, 23, 68, 0.1);
+  animation: phishingBorder 0.5s var(--ease-in-out) infinite;
+}
+
+.stress-score-display.phishing-suspected .stress-score-title {
+  color: #ff1744;
+  font-weight: var(--font-bold);
+}
+
+.stress-score-display.phishing-suspected .stress-pulse {
+  background: #ff1744;
+  animation: pulse 0.5s var(--ease-in-out) infinite;
+}
+
+@keyframes phishingGlow {
+  0%, 100% {
+    text-shadow: 0 0 20px rgba(255, 23, 68, 0.6);
+  }
+  50% {
+    text-shadow: 0 0 35px rgba(255, 23, 68, 0.9);
+  }
+}
+
+@keyframes phishingBorder {
+  0%, 100% {
+    border-color: #ff1744;
+    box-shadow: 0 0 15px rgba(255, 23, 68, 0.3);
+  }
+  50% {
+    border-color: #ff5252;
+    box-shadow: 0 0 25px rgba(255, 23, 68, 0.5);
+  }
+}
+
 .stress-score-unit {
   font-size: var(--text-sm);
   color: var(--foreground-muted);
@@ -103,6 +146,11 @@
 .stress-progress-fill.danger {
   background: var(--gradient-danger);
   animation: progressPulse 1.5s var(--ease-in-out) infinite;
+}
+
+.stress-progress-fill.phishing {
+  background: linear-gradient(135deg, #ff1744 0%, #ff5252 100%);
+  animation: progressPulse 0.5s var(--ease-in-out) infinite;
 }
 
 @keyframes progressPulse {

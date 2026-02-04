@@ -43,6 +43,7 @@ export class BehaviorTracker {
   private typingIntervals: number[] = [];
   private backspaceCount: number = 0;
   private focusBlurCount: number = 0;
+  private visibilityChangeCount: number = 0; // 화면 벗어남 (탭/앱 전환)
   private fieldHops: number = 0;
   private wasPasted: boolean = false;
 
@@ -63,6 +64,8 @@ export class BehaviorTracker {
     this.element.addEventListener("focus", this.handleFocus);
     this.element.addEventListener("blur", this.handleBlur);
     this.element.addEventListener("input", this.handleInput);
+    // 화면 벗어남 감지 (탭/앱 전환)
+    document.addEventListener("visibilitychange", this.handleVisibilityChange);
   }
 
   /**
@@ -74,6 +77,7 @@ export class BehaviorTracker {
     this.element.removeEventListener("focus", this.handleFocus);
     this.element.removeEventListener("blur", this.handleBlur);
     this.element.removeEventListener("input", this.handleInput);
+    document.removeEventListener("visibilitychange", this.handleVisibilityChange);
   }
 
   /**
@@ -127,6 +131,16 @@ export class BehaviorTracker {
   private handleBlur = (): void => {
     this.focusBlurCount++;
     this.notifyUpdate();
+  };
+
+  /**
+   * 화면 벗어남 이벤트 핸들러 (탭/앱 전환)
+   */
+  private handleVisibilityChange = (): void => {
+    if (document.hidden) {
+      this.visibilityChangeCount++;
+      this.notifyUpdate();
+    }
   };
 
   /**
@@ -203,6 +217,7 @@ export class BehaviorTracker {
       typingSpeedCps: this.calculateTypingSpeed(),
       backspaceCount: this.backspaceCount,
       focusBlurCount: this.focusBlurCount,
+      visibilityChangeCount: this.visibilityChangeCount,
       fieldHops: this.fieldHops,
       durationMs: Date.now() - this.startTime,
       hesitationCount: this.calculateHesitationCount(),
@@ -221,6 +236,7 @@ export class BehaviorTracker {
     this.typingIntervals = [];
     this.backspaceCount = 0;
     this.focusBlurCount = 0;
+    this.visibilityChangeCount = 0;
     this.fieldHops = 0;
     this.wasPasted = false;
   }

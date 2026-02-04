@@ -565,12 +565,16 @@ export function TransferScreen({ onBack }: TransferScreenProps) {
                 }
               }}
             />
+          </div>
+
+          {/* 송금 버튼 (하단 고정) */}
+          <div className="transfer-button-container">
             <button
-              className="search-button transfer-button"
+              className="transfer-submit-button"
               onClick={handleTransferClick}
               disabled={!accountInput.trim() || isAnalyzing}
             >
-              {isAnalyzing ? '...' : '송금'}
+              {isAnalyzing ? '분석 중...' : '송금하기'}
             </button>
           </div>
 
@@ -579,6 +583,36 @@ export function TransferScreen({ onBack }: TransferScreenProps) {
             <StressScoreDisplay
               signals={realtimeSignals}
               isTyping={isDirectTyping}
+              onPhishingSuspected={(stressScore) => {
+                // 80점 이상: 보이스피싱 의심 거래로 처리
+                console.log('보이스피싱 의심 감지 (스트레스 점수:', stressScore, ')');
+                // 자동으로 분석 결과 생성하여 경고 화면으로 이동
+                if (!riskAnalysis) {
+                  setRiskAnalysis({
+                    riskScore: stressScore,
+                    riskLevel: 'high',
+                    reasons: [
+                      { code: 'STRESS_TOUCH', message: '높은 스트레스 터치 감지', weight: 0.8 },
+                      { code: 'BEHAVIOR_PATTERN', message: '전화 지시에 따른 입력 의심', weight: 0.7 },
+                    ],
+                    extracted: {},
+                    recommendations: [
+                      '전화를 끊고 잠시 생각하세요',
+                      '가족이나 지인에게 상황을 알리세요',
+                      '의심되면 1394로 신고하세요'
+                    ],
+                  });
+                }
+                // 연락처 임시 설정
+                if (!selectedContact && accountInput) {
+                  setSelectedContact({
+                    name: '확인 필요',
+                    bank: '확인 필요',
+                    account: accountInput,
+                  });
+                }
+                setStep('warning');
+              }}
             />
           )}
 

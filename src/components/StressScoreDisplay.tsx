@@ -1,6 +1,14 @@
 /**
  * 스트레스 터치 분석 컴포넌트
  * 직접 입력 시 행위 기반 스트레스 점수를 실시간으로 표시
+ *
+ * 분석 요소 (4가지):
+ * - 화면 벗어남 (visibilityChangeCount) - 탭/앱 전환
+ * - 썼다 지움 (backspaceCount)
+ * - 포커스 벗어남 (focusBlurCount) - 입력 필드에서 포커스 이탈
+ * - 지움 비율 높음 (eraseInputRatio)
+ *
+ * 80점 이상: 보이스피싱 의심 거래
  */
 
 import { useEffect, useState } from 'react';
@@ -10,6 +18,7 @@ import './StressScoreDisplay.css';
 interface StressScoreDisplayProps {
   signals: BehaviorSignals | null;
   isTyping: boolean;
+  onPhishingSuspected?: (score: number) => void;
 }
 
 interface StressFactor {
@@ -18,7 +27,7 @@ interface StressFactor {
   score: number;
 }
 
-export function StressScoreDisplay({ signals, isTyping }: StressScoreDisplayProps) {
+export function StressScoreDisplay({ signals, isTyping, onPhishingSuspected }: StressScoreDisplayProps) {
   const [score, setScore] = useState(0);
   const [factors, setFactors] = useState<StressFactor[]>([]);
 
@@ -29,91 +38,57 @@ export function StressScoreDisplay({ signals, isTyping }: StressScoreDisplayProp
       return;
     }
 
-    // 스트레스 점수 계산 (더 민감하게 조정)
+    // 스트레스 점수 계산 (4가지 요소)
     let totalScore = 0;
     const activeFactors: StressFactor[] = [];
 
-    // 기본 점수 - 입력 시작 시 약간의 기본 점수
-    if (signals.durationMs > 500) {
-      totalScore += 5;
+    // 1. 화면 벗어남 (탭/앱 전환) - 매우 높은 비중
+    // 입력 중 다른 앱/탭을 보면 강한 스트레스 신호 (전화 지시 의심)
+    const visibilityCount = signals.visibilityChangeCount || 0;
+    if (visibilityCount >= 1) {
+      const visibilityScore = Math.min(40, visibilityCount * 25);
+      totalScore += visibilityScore;
+      activeFactors.push({
+        name: '화면 벗어남',
+        active: true,
+        score: visibilityScore
+      });
     }
 
-    // 1. 타이핑 속도 분석 (더 민감하게)
-    if (signals.typingSpeedCps > 0) {
-      if (signals.typingSpeedCps < 3) {
-        // 느린 타이핑 - 망설임 (기준 완화: 3cps 이하)
-        const hesitationScore = Math.min(25, Math.floor((3 - signals.typingSpeedCps) * 12));
-        totalScore += hesitationScore;
-        if (hesitationScore > 3) {
-          activeFactors.push({ name: '입력 망설임', active: true, score: hesitationScore });
-        }
-      } else if (signals.typingSpeedCps > 6) {
-        // 빠른 타이핑 - 급함 (기준 완화: 6cps 이상)
-        const rushScore = Math.min(20, Math.floor((signals.typingSpeedCps - 6) * 8));
-        totalScore += rushScore;
-        if (rushScore > 3) {
-          activeFactors.push({ name: '급한 입력', active: true, score: rushScore });
-        }
-      }
-    }
-
-    // 2. 백스페이스 사용 분석 (더 민감하게)
+    // 2. 썼다 지움 - 백스페이스 사용 (높은 비중)
+    // 수정이 많으면 확신이 없는 상태 (지시받으며 입력)
     if (signals.backspaceCount >= 1) {
-      const correctionScore = Math.min(30, signals.backspaceCount * 8);
-      totalScore += correctionScore;
-      activeFactors.push({ name: '수정 반복', active: true, score: correctionScore });
+      const backspaceScore = Math.min(35, signals.backspaceCount * 12);
+      totalScore += backspaceScore;
+      activeFactors.push({
+        name: '썼다 지움',
+        active: true,
+        score: backspaceScore
+      });
     }
 
-    // 3. 입력 시간 분석 (더 민감하게)
-    if (signals.durationMs > 3000) {
-      // 3초 이상 - 망설임 (기준 완화)
-      const durationScore = Math.min(25, Math.floor((signals.durationMs - 3000) / 1000) * 6);
-      totalScore += durationScore;
-      if (durationScore > 3) {
-        activeFactors.push({ name: '오래 망설임', active: true, score: durationScore });
-      }
-    }
-
-    // 4. 포커스 전환 분석 (더 민감하게)
-    if (signals.focusBlurCount >= 1) {
-      const focusScore = Math.min(20, signals.focusBlurCount * 10);
+    // 3. 포커스 벗어남 (입력 필드에서 포커스 이탈) - 높은 비중
+    // 입력 중 다른 곳 클릭하면 주의 분산 상태
+    if (signals.focusBlurCount >= 2) { // 최초 focus 1회 제외
+      const focusScore = Math.min(35, (signals.focusBlurCount - 1) * 15);
       totalScore += focusScore;
-      activeFactors.push({ name: '화면 전환', active: true, score: focusScore });
+      activeFactors.push({
+        name: '포커스 벗어남',
+        active: true,
+        score: focusScore
+      });
     }
 
-    // 5. 최대 타이핑 간격 분석 (더 민감하게)
-    if (signals.maxTypingInterval > 1500) {
-      // 1.5초 이상 멈춤 (기준 완화)
-      const pauseScore = Math.min(25, Math.floor((signals.maxTypingInterval - 1500) / 500) * 8);
-      totalScore += pauseScore;
-      if (pauseScore > 3) {
-        activeFactors.push({ name: '긴 멈춤', active: true, score: pauseScore });
-      }
-    }
-
-    // 6. 입력 삭제 비율 분석 (더 민감하게)
-    if (signals.eraseInputRatio > 0.15) {
-      // 15% 이상 삭제 (기준 완화)
-      const eraseScore = Math.min(25, Math.floor(signals.eraseInputRatio * 60));
+    // 4. 지움 비율 높음 (높은 비중)
+    // 입력 대비 삭제가 많으면 불안한 상태
+    if (signals.eraseInputRatio > 0.1) {
+      const eraseScore = Math.min(40, Math.floor(signals.eraseInputRatio * 100));
       totalScore += eraseScore;
-      activeFactors.push({ name: '삭제 반복', active: true, score: eraseScore });
-    }
-
-    // 7. 머뭇거림 횟수 분석 (새로 추가)
-    if (signals.hesitationCount > 0) {
-      const hesitScore = Math.min(20, signals.hesitationCount * 12);
-      totalScore += hesitScore;
-      activeFactors.push({ name: '머뭇거림', active: true, score: hesitScore });
-    }
-
-    // 8. 평균 타이핑 간격 분석 (새로 추가)
-    if (signals.avgTypingInterval > 500) {
-      // 500ms 이상 평균 간격
-      const avgScore = Math.min(15, Math.floor((signals.avgTypingInterval - 500) / 200) * 5);
-      totalScore += avgScore;
-      if (avgScore > 3) {
-        activeFactors.push({ name: '느린 반응', active: true, score: avgScore });
-      }
+      activeFactors.push({
+        name: '지움 비율 ' + Math.round(signals.eraseInputRatio * 100) + '%',
+        active: true,
+        score: eraseScore
+      });
     }
 
     // 점수 제한 (0-100)
@@ -121,27 +96,33 @@ export function StressScoreDisplay({ signals, isTyping }: StressScoreDisplayProp
 
     setScore(totalScore);
     setFactors(activeFactors);
-  }, [signals, isTyping]);
 
-  // 타이핑 중이 아니면 표시하지 않음
+    // 80점 이상이면 보이스피싱 의심 콜백 호출
+    if (totalScore >= 80 && onPhishingSuspected) {
+      onPhishingSuspected(totalScore);
+    }
+  }, [signals, isTyping, onPhishingSuspected]);
+
+  // 타이핑 중이 아니거나 신호가 없으면 표시하지 않음
   if (!isTyping || !signals || signals.durationMs < 300) {
     return null;
   }
 
-  const getScoreLevel = (score: number): 'safe' | 'warning' | 'danger' => {
-    if (score < 25) return 'safe';
-    if (score < 50) return 'warning';
-    return 'danger';
+  const getScoreLevel = (score: number): 'safe' | 'warning' | 'danger' | 'phishing' => {
+    if (score < 30) return 'safe';
+    if (score < 60) return 'warning';
+    if (score < 80) return 'danger';
+    return 'phishing'; // 80점 이상: 보이스피싱 의심
   };
 
   const scoreLevel = getScoreLevel(score);
 
   return (
-    <div className="stress-score-display">
+    <div className={`stress-score-display ${scoreLevel === 'phishing' ? 'phishing-suspected' : ''}`}>
       <div className="stress-score-header">
         <span className="stress-score-title">
           <span className="stress-pulse"></span>
-          스트레스 터치 분석
+          {scoreLevel === 'phishing' ? '보이스피싱 의심' : '스트레스 터치 분석'}
         </span>
         <span className={`stress-score-value ${scoreLevel}`}>
           {score}
@@ -169,8 +150,9 @@ export function StressScoreDisplay({ signals, isTyping }: StressScoreDisplayProp
 
       <div className="stress-hint">
         {scoreLevel === 'safe' && '정상적인 입력 패턴입니다'}
-        {scoreLevel === 'warning' && '약간의 망설임이 감지되고 있습니다'}
-        {scoreLevel === 'danger' && '강한 스트레스 신호가 감지되고 있습니다'}
+        {scoreLevel === 'warning' && '약간의 불안 신호가 감지됩니다'}
+        {scoreLevel === 'danger' && '강한 스트레스 신호가 감지됩니다'}
+        {scoreLevel === 'phishing' && '전화 지시에 따른 입력이 의심됩니다!'}
       </div>
     </div>
   );

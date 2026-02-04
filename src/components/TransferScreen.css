@@ -10,6 +10,9 @@
   background: var(--background);
   display: flex;
   flex-direction: column;
+  max-width: 100vw;
+  overflow-x: hidden;
+  box-sizing: border-box;
 }
 
 /* 헤더 */
@@ -52,7 +55,10 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: var(--space-6) var(--space-4);
+  padding: var(--space-4);
+  max-width: 100%;
+  overflow-x: hidden;
+  box-sizing: border-box;
 }
 
 .screen-title {
@@ -138,15 +144,61 @@
   }
 }
 
-/* 검색바 */
+/* 계좌번호 입력 영역 */
 .search-bar {
-  display: flex;
-  gap: var(--space-2);
+  display: block;
+  margin-bottom: var(--space-3);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* 송금 버튼 컨테이너 */
+.transfer-button-container {
+  width: 100%;
   margin-bottom: var(--space-4);
+  box-sizing: border-box;
+}
+
+.transfer-submit-button {
+  display: block;
+  width: 100%;
+  padding: var(--space-4);
+  background: var(--gradient-primary);
+  color: var(--primary-foreground);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--text-lg);
+  font-weight: var(--font-bold);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
+  box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+  animation: submitButtonGlow 2s ease-in-out infinite;
+  box-sizing: border-box;
+}
+
+.transfer-submit-button:hover:not(:disabled) {
+  box-shadow: 0 0 30px rgba(99, 102, 241, 0.5);
+  transform: translateY(-2px);
+}
+
+.transfer-submit-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  animation: none;
+}
+
+@keyframes submitButtonGlow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 35px rgba(99, 102, 241, 0.5);
+  }
 }
 
 .search-input {
-  flex: 1;
+  display: block;
+  width: 100%;
   padding: var(--space-3) var(--space-4);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
@@ -156,6 +208,7 @@
   min-height: 48px;
   font-family: inherit;
   transition: all var(--duration-fast) var(--ease-out);
+  box-sizing: border-box;
 }
 
 .search-input:focus {
