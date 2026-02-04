@@ -257,51 +257,101 @@
 }
 
 .action-btn.primary {
-  background: rgba(99, 102, 241, 0.15);
-  border-color: rgba(99, 102, 241, 0.5);
-  box-shadow: 0 0 15px rgba(99, 102, 241, 0.3);
-  animation: transferButtonGlow 2s ease-in-out infinite;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(139, 92, 246, 0.2) 100%);
+  border-color: rgba(99, 102, 241, 0.6);
+  box-shadow:
+    0 0 20px rgba(99, 102, 241, 0.4),
+    0 0 40px rgba(99, 102, 241, 0.2),
+    inset 0 0 20px rgba(99, 102, 241, 0.1);
+  animation:
+    transferButtonGlow 2s ease-in-out infinite,
+    transferBounce 2s ease-in-out infinite;
   position: relative;
+  z-index: 1;
 }
 
 .action-btn.primary::before {
   content: '';
   position: absolute;
-  inset: -2px;
+  inset: -3px;
   border-radius: var(--radius-xl);
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.4), rgba(139, 92, 246, 0.4));
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.6), rgba(139, 92, 246, 0.6), rgba(99, 102, 241, 0.6));
+  background-size: 200% 200%;
   z-index: -1;
-  animation: transferRingPulse 2s ease-in-out infinite;
-  opacity: 0;
+  animation: transferGradientRotate 3s linear infinite;
+  opacity: 0.5;
+  filter: blur(8px);
+}
+
+.action-btn.primary::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-xl);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+  pointer-events: none;
 }
 
 @keyframes transferButtonGlow {
   0%, 100% {
-    box-shadow: 0 0 15px rgba(99, 102, 241, 0.3);
+    box-shadow:
+      0 0 20px rgba(99, 102, 241, 0.4),
+      0 0 40px rgba(99, 102, 241, 0.2),
+      inset 0 0 20px rgba(99, 102, 241, 0.1);
   }
   50% {
-    box-shadow: 0 0 25px rgba(99, 102, 241, 0.5), 0 0 40px rgba(99, 102, 241, 0.2);
+    box-shadow:
+      0 0 30px rgba(99, 102, 241, 0.6),
+      0 0 60px rgba(99, 102, 241, 0.3),
+      0 0 80px rgba(139, 92, 246, 0.2),
+      inset 0 0 25px rgba(99, 102, 241, 0.15);
   }
 }
 
-@keyframes transferRingPulse {
+@keyframes transferBounce {
   0%, 100% {
-    opacity: 0;
+    transform: translateY(0);
+  }
+  15% {
+    transform: translateY(-6px);
+  }
+  30% {
+    transform: translateY(0);
+  }
+  45% {
+    transform: translateY(-3px);
+  }
+  60% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes transferGradientRotate {
+  0% {
+    background-position: 0% 50%;
   }
   50% {
-    opacity: 0.6;
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
   }
 }
 
 .action-btn.primary:hover {
-  background: rgba(99, 102, 241, 0.25);
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.3) 0%, rgba(139, 92, 246, 0.3) 100%);
   animation: none;
-  box-shadow: 0 0 25px rgba(99, 102, 241, 0.5);
+  transform: translateY(-4px) scale(1.02);
+  box-shadow:
+    0 0 35px rgba(99, 102, 241, 0.6),
+    0 0 70px rgba(99, 102, 241, 0.3),
+    0 8px 25px rgba(0, 0, 0, 0.3);
 }
 
 .action-btn.primary:hover::before {
   opacity: 0.8;
   animation: none;
+  filter: blur(12px);
 }
 
 .action-btn:active {
@@ -321,8 +371,40 @@
 }
 
 .action-icon.primary {
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.3), rgba(139, 92, 246, 0.3));
-  box-shadow: 0 0 15px rgba(99, 102, 241, 0.3);
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.4), rgba(139, 92, 246, 0.4));
+  box-shadow:
+    0 0 15px rgba(99, 102, 241, 0.4),
+    inset 0 0 10px rgba(255, 255, 255, 0.1);
+  animation: iconFloat 2s ease-in-out infinite;
+  font-size: 20px;
+}
+
+@keyframes iconFloat {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.action-btn.primary:hover .action-icon.primary {
+  animation: iconWiggle 0.5s ease-in-out;
+  box-shadow:
+    0 0 25px rgba(99, 102, 241, 0.6),
+    inset 0 0 15px rgba(255, 255, 255, 0.2);
+}
+
+@keyframes iconWiggle {
+  0%, 100% {
+    transform: rotate(0deg) scale(1.1);
+  }
+  25% {
+    transform: rotate(-10deg) scale(1.15);
+  }
+  75% {
+    transform: rotate(10deg) scale(1.15);
+  }
 }
 
 .action-label {
@@ -332,9 +414,21 @@
 }
 
 .action-label.primary {
-  color: var(--primary-light);
+  color: #a5b4fc;
   font-weight: var(--font-bold);
-  text-shadow: 0 0 10px rgba(99, 102, 241, 0.3);
+  text-shadow: 0 0 15px rgba(99, 102, 241, 0.5);
+  animation: labelPulse 2s ease-in-out infinite;
+}
+
+@keyframes labelPulse {
+  0%, 100% {
+    opacity: 1;
+    text-shadow: 0 0 15px rgba(99, 102, 241, 0.5);
+  }
+  50% {
+    opacity: 1;
+    text-shadow: 0 0 25px rgba(99, 102, 241, 0.8), 0 0 35px rgba(139, 92, 246, 0.4);
+  }
 }
 
 /* Recent Transactions */
