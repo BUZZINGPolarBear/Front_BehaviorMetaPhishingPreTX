@@ -77,8 +77,8 @@ export function TransferScreen({ onBack }: TransferScreenProps) {
     setRealtimeSignals(null);
     // 샘플 선택 시에는 tracker 리셋 후 샘플용 신호로 분석
     resetTracker();
-    // 샘플의 expectedRisk를 전달하여 의도된 대로 동작하도록 함
-    await processMessage(sample.message, true, sample.expectedRisk);
+    // 샘플의 expectedRisk와 카테고리를 전달하여 의도된 대로 동작하도록 함
+    await processMessage(sample.message, true, sample.expectedRisk, sample.category);
   };
 
   // 텍스트가 샘플 메시지와 일치하는지 확인
@@ -93,10 +93,12 @@ export function TransferScreen({ onBack }: TransferScreenProps) {
   // 메시지 처리 (붙여넣기 또는 샘플)
   // isSampleSelect: 샘플 버튼 클릭으로 선택한 경우 true (행위 분석 제외)
   // sampleExpectedRisk: 샘플의 예상 위험도 (샘플 선택 시에만 사용)
+  // sampleCategory: 샘플의 카테고리 (dangerous인 경우 유사도 80% 적용)
   const processMessage = async (
     text: string,
     isSampleSelect: boolean = false,
-    sampleExpectedRisk?: 'low' | 'medium' | 'high'
+    sampleExpectedRisk?: 'low' | 'medium' | 'high',
+    sampleCategory?: 'safe' | 'suspicious' | 'dangerous'
   ) => {
 
     // 1. 원본 메시지 저장 (위에 표시용)
@@ -156,7 +158,35 @@ export function TransferScreen({ onBack }: TransferScreenProps) {
         ]);
 
         setRiskAnalysis(localResult);
-        setMatchResult(backendResult);
+
+        // 샘플 메시지가 'dangerous' 카테고리인 경우 유사도를 80%로 강제 설정
+        const effectiveCategory = sampleCategory || matchingSample?.category;
+        if (effectiveIsSampleSelect && effectiveCategory === 'dangerous') {
+          // 유사도 80%로 설정된 matchResult 생성
+          const overriddenMatchResult: MatchResponse = backendResult ? {
+            ...backendResult,
+            top_match: backendResult.top_match ? {
+              ...backendResult.top_match,
+              similarity: 0.8, // 80%로 강제 설정
+            } : {
+              scam_type: '보이스피싱 의심',
+              similarity: 0.8,
+              message: '이 메시지는 보이스피싱 사기 유형과 유사합니다.',
+              reasons: ['기관사칭', '긴급 송금 요구', '비밀 유지 요구'],
+            },
+          } : {
+            top_match: {
+              scam_type: '보이스피싱 의심',
+              similarity: 0.8,
+              message: '이 메시지는 보이스피싱 사기 유형과 유사합니다.',
+              reasons: ['기관사칭', '긴급 송금 요구', '비밀 유지 요구'],
+            },
+            top_cases: [],
+          };
+          setMatchResult(overriddenMatchResult);
+        } else {
+          setMatchResult(backendResult);
+        }
 
         // 최종 위험도 결정
         let finalRiskLevel = localResult.riskLevel;
@@ -325,6 +355,16 @@ export function TransferScreen({ onBack }: TransferScreenProps) {
 
             // 고위험(스트레스 터치)이면 경고 화면으로 이동
             if (localResult.riskLevel === 'high') {
+              // 직접 입력 시에도 유사도 80%로 matchResult 설정
+              setMatchResult({
+                top_match: {
+                  scam_type: '행위 패턴 분석',
+                  similarity: 0.8, // 80%로 설정
+                  message: '입력 중 의심스러운 행동 패턴이 감지되었습니다.',
+                  reasons: ['불안정한 입력 패턴', '행위 분석 고위험'],
+                },
+                top_cases: [],
+              });
               setIsAnalyzing(false);
               setStep('warning');
               return;
@@ -333,7 +373,6 @@ export function TransferScreen({ onBack }: TransferScreenProps) {
             // 붙여넣기한 경우: 백엔드 Claude로 텍스트 내용 분석
             console.log('붙여넣기 감지 - 백엔드 Claude로 텍스트 분석');
             const backendResult = await matchPhishing(accountInput, { channel: 'app' });
-            setMatchResult(backendResult);
 
             // 백엔드 매칭 결과에 따라 위험도 상향 조정
             let finalRiskLevel = localResult.riskLevel;
@@ -346,6 +385,22 @@ export function TransferScreen({ onBack }: TransferScreenProps) {
                 });
                 finalRiskLevel = 'high';
               }
+              setMatchResult(backendResult);
+            } else if (localResult.riskLevel === 'high') {
+              // 로컬 분석이 고위험이지만 백엔드 결과가 없거나 낮은 경우
+              // 유사도 80%로 matchResult 설정
+              setMatchResult({
+                top_match: {
+                  scam_type: '행위 패턴 분석',
+                  similarity: 0.8, // 80%로 설정
+                  message: '입력 중 의심스러운 행동 패턴이 감지되었습니다.',
+                  reasons: ['붙여넣기 감지', '행위 분석 고위험'],
+                },
+                top_cases: [],
+              });
+              finalRiskLevel = 'high';
+            } else {
+              setMatchResult(backendResult);
             }
 
             // 고위험이면 경고 화면으로 이동
@@ -603,6 +658,16 @@ export function TransferScreen({ onBack }: TransferScreenProps) {
                     ],
                   });
                 }
+                // 직접 입력 시에도 유사도 80%로 matchResult 설정
+                setMatchResult({
+                  top_match: {
+                    scam_type: '스트레스 터치 감지',
+                    similarity: 0.8, // 80%로 설정
+                    message: '입력 중 높은 스트레스 패턴이 감지되었습니다.',
+                    reasons: ['불안정한 입력 패턴', '전화 지시 의심', '높은 스트레스 터치'],
+                  },
+                  top_cases: [],
+                });
                 // 연락처 임시 설정
                 if (!selectedContact && accountInput) {
                   setSelectedContact({
