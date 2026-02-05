@@ -37,6 +37,7 @@ export function PhishingWarningScreen({
   const [isAnalyzingScreenshot, setIsAnalyzingScreenshot] = useState(false);
   const [screenshotAnalysisResult, setScreenshotAnalysisResult] = useState<ScreenshotAnalysisResponse | null>(null);
   const [showAnalysisModal, setShowAnalysisModal] = useState(false);
+  const [show1394Modal, setShow1394Modal] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { riskScore, scoreBreakdown } = analysis;
@@ -90,9 +91,9 @@ export function PhishingWarningScreen({
     }
   };
 
-  // 1394 전화하기
+  // 1394 전화하기 모달 열기
   const handleCall1394 = () => {
-    alert('보이스피싱 상담센터 1394로 연결됩니다.\n\n(데모 버전으로 실제 통화는 연결되지 않습니다)\n\n실제 의심되는 경우 직접 1394로 전화해주세요.');
+    setShow1394Modal(true);
   };
 
   // 감지된 위험 신호 목록 생성 (행위 분석 기반)
@@ -352,6 +353,78 @@ export function PhishingWarningScreen({
           result={screenshotAnalysisResult}
           onClose={() => setShowAnalysisModal(false)}
         />
+      )}
+
+      {/* 1394 상담센터 안내 모달 */}
+      {show1394Modal && (
+        <div className="modal-overlay" onClick={() => setShow1394Modal(false)}>
+          <div className="modal-container modal-1394" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <div className="modal-icon-wrapper">
+                <span className="modal-icon">📞</span>
+              </div>
+              <h2 className="modal-title">보이스피싱 상담센터</h2>
+              <button className="modal-close" onClick={() => setShow1394Modal(false)}>✕</button>
+            </div>
+
+            <div className="modal-body">
+              <div className="phone-number-display">
+                <span className="phone-label">전화번호</span>
+                <span className="phone-number">1394</span>
+              </div>
+
+              <div className="modal-info-section">
+                <div className="info-item">
+                  <span className="info-icon">🕐</span>
+                  <div className="info-content">
+                    <span className="info-title">운영시간</span>
+                    <span className="info-desc">24시간 연중무휴</span>
+                  </div>
+                </div>
+                <div className="info-item">
+                  <span className="info-icon">💰</span>
+                  <div className="info-content">
+                    <span className="info-title">통화료</span>
+                    <span className="info-desc">무료</span>
+                  </div>
+                </div>
+                <div className="info-item">
+                  <span className="info-icon">🛡️</span>
+                  <div className="info-content">
+                    <span className="info-title">상담내용</span>
+                    <span className="info-desc">보이스피싱 피해 신고 및 상담</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="modal-notice">
+                <span className="notice-icon">ℹ️</span>
+                <p className="notice-text">
+                  데모 버전으로 실제 통화는 연결되지 않습니다.<br/>
+                  실제 의심되는 경우 직접 <strong>1394</strong>로 전화해주세요.
+                </p>
+              </div>
+            </div>
+
+            <div className="modal-footer">
+              <button
+                className="modal-button-primary"
+                onClick={() => {
+                  // 실제 전화 연결 시도 (모바일에서만 작동)
+                  window.location.href = 'tel:1394';
+                }}
+              >
+                📞 1394 전화하기
+              </button>
+              <button
+                className="modal-button-secondary"
+                onClick={() => setShow1394Modal(false)}
+              >
+                닫기
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
