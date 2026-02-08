@@ -3,10 +3,10 @@
  * 직접 입력 시 행위 기반 스트레스 점수를 실시간으로 표시
  *
  * 분석 요소 (4가지):
- * - 화면 벗어남 (visibilityChangeCount) - 탭/앱 전환
- * - 썼다 지움 (backspaceCount)
  * - 포커스 벗어남 (focusBlurCount) - 입력 필드에서 포커스 이탈
- * - 지움 비율 높음 (eraseInputRatio)
+ * - 썼다 지움 (backspaceCount)
+ * - 지움 비율 높음 (eraseInputRatio > 10%)
+ * - 머뭇거림 (hesitationCount) - 1.5초 이상 멈춤 (강도 약함)
  *
  * 80점 이상: 보이스피싱 의심 거래
  */
@@ -42,16 +42,15 @@ export function StressScoreDisplay({ signals, isTyping, onPhishingSuspected }: S
     let totalScore = 0;
     const activeFactors: StressFactor[] = [];
 
-    // 1. 화면 벗어남 (탭/앱 전환) - 매우 높은 비중
-    // 입력 중 다른 앱/탭을 보면 강한 스트레스 신호 (전화 지시 의심)
-    const visibilityCount = signals.visibilityChangeCount || 0;
-    if (visibilityCount >= 1) {
-      const visibilityScore = Math.min(40, visibilityCount * 25);
-      totalScore += visibilityScore;
+    // 1. 포커스 벗어남 (입력 필드에서 포커스 이탈) - 높은 비중
+    // 입력 중 다른 곳 클릭하면 주의 분산 상태 (전화 확인 등)
+    if (signals.focusBlurCount >= 2) { // 최초 focus 1회 제외
+      const focusScore = Math.min(35, (signals.focusBlurCount - 1) * 15);
+      totalScore += focusScore;
       activeFactors.push({
-        name: '화면 벗어남',
+        name: '포커스 벗어남',
         active: true,
-        score: visibilityScore
+        score: focusScore
       });
     }
 
@@ -67,20 +66,8 @@ export function StressScoreDisplay({ signals, isTyping, onPhishingSuspected }: S
       });
     }
 
-    // 3. 포커스 벗어남 (입력 필드에서 포커스 이탈) - 높은 비중
-    // 입력 중 다른 곳 클릭하면 주의 분산 상태
-    if (signals.focusBlurCount >= 2) { // 최초 focus 1회 제외
-      const focusScore = Math.min(35, (signals.focusBlurCount - 1) * 15);
-      totalScore += focusScore;
-      activeFactors.push({
-        name: '포커스 벗어남',
-        active: true,
-        score: focusScore
-      });
-    }
-
-    // 4. 지움 비율 높음 (높은 비중)
-    // 입력 대비 삭제가 많으면 불안한 상태
+    // 3. 지움 비율 높음 (높은 비중)
+    // 입력 대비 삭제가 10%를 넘으면 불안한 상태
     if (signals.eraseInputRatio > 0.1) {
       const eraseScore = Math.min(40, Math.floor(signals.eraseInputRatio * 100));
       totalScore += eraseScore;
@@ -88,6 +75,18 @@ export function StressScoreDisplay({ signals, isTyping, onPhishingSuspected }: S
         name: '지움 비율 ' + Math.round(signals.eraseInputRatio * 100) + '%',
         active: true,
         score: eraseScore
+      });
+    }
+
+    // 4. 머뭇거림 - 1.5초 이상 멈춤 (약한 비중)
+    // 전화로 지시를 듣느라 잠시 멈추는 패턴
+    if (signals.hesitationCount >= 1) {
+      const hesitationScore = Math.min(20, signals.hesitationCount * 8);
+      totalScore += hesitationScore;
+      activeFactors.push({
+        name: '머뭇거림',
+        active: true,
+        score: hesitationScore
       });
     }
 

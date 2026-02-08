@@ -162,23 +162,21 @@ export function TransferScreen({ onBack }: TransferScreenProps) {
         // 샘플 메시지가 'dangerous' 카테고리인 경우 유사도를 80%로 강제 설정
         const effectiveCategory = sampleCategory || matchingSample?.category;
         if (effectiveIsSampleSelect && effectiveCategory === 'dangerous') {
-          // 유사도 80%로 설정된 matchResult 생성
+          // 유사도 80%로 설정된 matchResult 생성 (message도 80%에 맞게 수정)
+          const scamType = backendResult?.top_match?.scam_type || '보이스피싱 의심';
           const overriddenMatchResult: MatchResponse = backendResult ? {
             ...backendResult,
-            top_match: backendResult.top_match ? {
-              ...backendResult.top_match,
+            top_match: {
+              scam_type: backendResult.top_match?.scam_type || '보이스피싱 의심',
               similarity: 0.8, // 80%로 강제 설정
-            } : {
-              scam_type: '보이스피싱 의심',
-              similarity: 0.8,
-              message: '이 메시지는 보이스피싱 사기 유형과 유사합니다.',
-              reasons: ['기관사칭', '긴급 송금 요구', '비밀 유지 요구'],
+              message: `현재 고객님의 거래는 '${scamType}' 사례와 80% 유사합니다.`,
+              reasons: backendResult.top_match?.reasons || ['기관사칭', '긴급 송금 요구', '비밀 유지 요구'],
             },
           } : {
             top_match: {
               scam_type: '보이스피싱 의심',
               similarity: 0.8,
-              message: '이 메시지는 보이스피싱 사기 유형과 유사합니다.',
+              message: '현재 고객님의 거래는 보이스피싱 사기 사례와 80% 유사합니다.',
               reasons: ['기관사칭', '긴급 송금 요구', '비밀 유지 요구'],
             },
             top_cases: [],
@@ -360,7 +358,7 @@ export function TransferScreen({ onBack }: TransferScreenProps) {
                 top_match: {
                   scam_type: '행위 패턴 분석',
                   similarity: 0.8, // 80%로 설정
-                  message: '입력 중 의심스러운 행동 패턴이 감지되었습니다.',
+                  message: '현재 고객님의 거래는 보이스피싱 의심 사례와 80% 유사합니다.',
                   reasons: ['불안정한 입력 패턴', '행위 분석 고위험'],
                 },
                 top_cases: [],
@@ -393,7 +391,7 @@ export function TransferScreen({ onBack }: TransferScreenProps) {
                 top_match: {
                   scam_type: '행위 패턴 분석',
                   similarity: 0.8, // 80%로 설정
-                  message: '입력 중 의심스러운 행동 패턴이 감지되었습니다.',
+                  message: '현재 고객님의 거래는 보이스피싱 의심 사례와 80% 유사합니다.',
                   reasons: ['붙여넣기 감지', '행위 분석 고위험'],
                 },
                 top_cases: [],
@@ -622,18 +620,7 @@ export function TransferScreen({ onBack }: TransferScreenProps) {
             />
           </div>
 
-          {/* 송금 버튼 (하단 고정) */}
-          <div className="transfer-button-container">
-            <button
-              className="transfer-submit-button"
-              onClick={handleTransferClick}
-              disabled={!accountInput.trim() || isAnalyzing}
-            >
-              {isAnalyzing ? '분석 중...' : '송금하기'}
-            </button>
-          </div>
-
-          {/* 실시간 스트레스 점수 표시 (직접 타이핑 중일 때) */}
+          {/* 실시간 스트레스 점수 표시 (직접 타이핑 중일 때) - 입력 필드 바로 아래 */}
           {isDirectTyping && !originalMessage && (
             <StressScoreDisplay
               signals={realtimeSignals}
@@ -663,7 +650,7 @@ export function TransferScreen({ onBack }: TransferScreenProps) {
                   top_match: {
                     scam_type: '스트레스 터치 감지',
                     similarity: 0.8, // 80%로 설정
-                    message: '입력 중 높은 스트레스 패턴이 감지되었습니다.',
+                    message: '현재 고객님의 거래는 보이스피싱 의심 사례와 80% 유사합니다.',
                     reasons: ['불안정한 입력 패턴', '전화 지시 의심', '높은 스트레스 터치'],
                   },
                   top_cases: [],
@@ -680,6 +667,17 @@ export function TransferScreen({ onBack }: TransferScreenProps) {
               }}
             />
           )}
+
+          {/* 송금 버튼 */}
+          <div className="transfer-button-container">
+            <button
+              className="transfer-submit-button"
+              onClick={handleTransferClick}
+              disabled={!accountInput.trim() || isAnalyzing}
+            >
+              {isAnalyzing ? '분석 중...' : '송금하기'}
+            </button>
+          </div>
 
           {/* 분석 중 표시 */}
           {isAnalyzing && (
