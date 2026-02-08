@@ -13,6 +13,7 @@ import './PhishingWarningScreen.css';
 interface PhishingWarningScreenProps {
   analysis: AnalyzeResponse;
   matchResult?: MatchResponse | null;
+  source?: 'typedb' | 'stress-touch';
   onProceedAnyway: () => void;
   onCancel: () => void;
 }
@@ -28,6 +29,7 @@ const CHECKLIST_QUESTIONS = [
 export function PhishingWarningScreen({
   analysis,
   matchResult,
+  source = 'typedb',
   onProceedAnyway,
   onCancel,
 }: PhishingWarningScreenProps) {
@@ -149,11 +151,20 @@ export function PhishingWarningScreen({
       </header>
 
       <div className="warning-content">
-        {/* 백엔드 TypeDB 기반 사례 매칭 경고 */}
+        {/* 상단 경고 카드 (출처에 따라 다른 메시지) */}
         <div className="case-match-alert">
-          <div className="alert-icon">⚠️</div>
+          <div className="alert-icon">{source === 'stress-touch' ? '📱' : '⚠️'}</div>
           <div className="alert-content">
-            {topMatch ? (
+            {source === 'stress-touch' ? (
+              <>
+                <p className="alert-main">
+                  스트레스 터치가 감지되었습니다.
+                </p>
+                <p className="alert-sub">
+                  전화통화로 지시받으시거나 불안한 상황이신가요?
+                </p>
+              </>
+            ) : topMatch ? (
               <>
                 <p className="alert-main">
                   TypeDB 분석 결과: <span className="highlight">'{topMatch.scam_type}'</span> 유형과{' '}
@@ -182,9 +193,9 @@ export function PhishingWarningScreen({
           <div className="gauge-header">
             <div className="gauge-title">
               <span className="gauge-icon">📊</span>
-              <span>{topMatch ? '사기 유형 일치도' : '스트레스 터치 점수'}</span>
+              <span>{source === 'stress-touch' ? '스트레스 터치 점수' : topMatch ? '사기 유형 일치도' : '스트레스 터치 점수'}</span>
             </div>
-            <span className="gauge-value">{riskScoreAnimated}%</span>
+            <span className="gauge-value">{riskScoreAnimated}{source === 'stress-touch' ? '점' : '%'}</span>
           </div>
           <div className="gauge-bar">
             <div
@@ -193,16 +204,18 @@ export function PhishingWarningScreen({
             />
           </div>
           <p className="gauge-description">
-            {topMatch
-              ? `'${topMatch.scam_type}' 유형과의 유사도`
-              : '입력 행동 패턴 분석 결과'}
+            {source === 'stress-touch'
+              ? '입력 중 감지된 스트레스 행동 패턴 분석 결과'
+              : topMatch
+                ? `'${topMatch.scam_type}' 유형과의 유사도`
+                : '입력 행동 패턴 분석 결과'}
           </p>
         </div>
 
         {/* 현재 상황 vs 백엔드 TypeDB 유사 사례 비교 */}
         <div className="comparison-section">
           <h3 className="comparison-title">
-            {topMatch ? '현재 상황 vs TypeDB 유사 사례' : '감지된 위험 신호'}
+            {source === 'stress-touch' ? '감지된 스트레스 신호' : topMatch ? '현재 상황 vs TypeDB 유사 사례' : '감지된 위험 신호'}
           </h3>
           <div className="comparison-grid">
             {/* 현재 상황 */}

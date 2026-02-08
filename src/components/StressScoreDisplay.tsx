@@ -18,7 +18,6 @@ import './StressScoreDisplay.css';
 interface StressScoreDisplayProps {
   signals: BehaviorSignals | null;
   isTyping: boolean;
-  onPhishingSuspected?: (score: number) => void;
 }
 
 interface StressFactor {
@@ -27,7 +26,7 @@ interface StressFactor {
   score: number;
 }
 
-export function StressScoreDisplay({ signals, isTyping, onPhishingSuspected }: StressScoreDisplayProps) {
+export function StressScoreDisplay({ signals, isTyping }: StressScoreDisplayProps) {
   const [score, setScore] = useState(0);
   const [factors, setFactors] = useState<StressFactor[]>([]);
 
@@ -95,12 +94,7 @@ export function StressScoreDisplay({ signals, isTyping, onPhishingSuspected }: S
 
     setScore(totalScore);
     setFactors(activeFactors);
-
-    // 80점 이상이면 보이스피싱 의심 콜백 호출
-    if (totalScore >= 80 && onPhishingSuspected) {
-      onPhishingSuspected(totalScore);
-    }
-  }, [signals, isTyping, onPhishingSuspected]);
+  }, [signals, isTyping]);
 
   // 타이핑 중이 아니거나 신호가 없으면 표시하지 않음
   if (!isTyping || !signals || signals.durationMs < 300) {

@@ -47,6 +47,7 @@ export function TransferScreen({ onBack }: TransferScreenProps) {
   const [showSamples, setShowSamples] = useState(true); // 샘플 메시지 표시 여부
   const [isDirectTyping, setIsDirectTyping] = useState(false); // 직접 타이핑 중 여부
   const [realtimeSignals, setRealtimeSignals] = useState<BehaviorSignals | null>(null); // 실시간 신호
+  const [warningSource, setWarningSource] = useState<'typedb' | 'stress-touch'>('typedb'); // 경고 화면 출처
 
   const accountInputRef = useRef<HTMLInputElement>(null);
   const { getSignals, reset: resetTracker } = useBehaviorTracker(accountInputRef);
@@ -347,22 +348,44 @@ export function TransferScreen({ onBack }: TransferScreenProps) {
 
           setRiskAnalysis(localResult);
 
-          // 직접 타이핑한 경우: 스트레스 터치만 감지, 백엔드 호출 안함
+          // 직접 타이핑한 경우: 스트레스 터치 점수로 판단, 백엔드 호출 안함
           if (isDirectTyping) {
-            console.log('직접 입력 감지 - 행위 분석만 수행 (백엔드 Claude 호출 생략)');
+            console.log('직접 입력 감지 - 스트레스 터치 분석 수행');
 
-            // 고위험(스트레스 터치)이면 경고 화면으로 이동
-            if (localResult.riskLevel === 'high') {
-              // 직접 입력 시에도 유사도 80%로 matchResult 설정
-              setMatchResult({
-                top_match: {
-                  scam_type: '행위 패턴 분석',
-                  similarity: 0.8, // 80%로 설정
-                  message: '현재 고객님의 거래는 보이스피싱 의심 사례와 80% 유사합니다.',
-                  reasons: ['불안정한 입력 패턴', '행위 분석 고위험'],
-                },
-                top_cases: [],
+            // 스트레스 터치 점수 계산 (StressScoreDisplay와 동일 로직)
+            let stressScore = 0;
+            if (signals.focusBlurCount >= 2) {
+              stressScore += Math.min(35, (signals.focusBlurCount - 1) * 15);
+            }
+            if (signals.backspaceCount >= 1) {
+              stressScore += Math.min(35, signals.backspaceCount * 12);
+            }
+            if (signals.eraseInputRatio > 0.1) {
+              stressScore += Math.min(40, Math.floor(signals.eraseInputRatio * 100));
+            }
+            if (signals.hesitationCount >= 1) {
+              stressScore += Math.min(20, signals.hesitationCount * 8);
+            }
+            stressScore = Math.min(100, Math.max(0, stressScore));
+
+            // 스트레스 터치 80점 이상이면 경고 화면으로 이동
+            if (stressScore >= 80) {
+              setRiskAnalysis({
+                riskScore: stressScore,
+                riskLevel: 'high',
+                reasons: [
+                  { code: 'STRESS_TOUCH', message: '높은 스트레스 터치 감지', weight: 0.8 },
+                  { code: 'BEHAVIOR_PATTERN', message: '전화 지시에 따른 입력 의심', weight: 0.7 },
+                ],
+                extracted: {},
+                recommendations: [
+                  '전화를 끊고 잠시 생각하세요',
+                  '가족이나 지인에게 상황을 알리세요',
+                  '의심되면 1394로 신고하세요'
+                ],
               });
+              setMatchResult(null); // TypeDB 매칭 결과 없음
+              setWarningSource('stress-touch');
               setIsAnalyzing(false);
               setStep('warning');
               return;
@@ -455,6 +478,7 @@ export function TransferScreen({ onBack }: TransferScreenProps) {
       <PhishingWarningScreen
         analysis={riskAnalysis}
         matchResult={matchResult}
+        source={warningSource}
         onProceedAnyway={() => {
           // 그럼에도 불구하고 송금하기 -> 금액 입력으로 이동
           // selectedContact가 없으면 accountInput으로 임시 연락처 생성
@@ -479,6 +503,7 @@ export function TransferScreen({ onBack }: TransferScreenProps) {
           setAmount('');
           setIsDirectTyping(false);
           setRealtimeSignals(null);
+          setWarningSource('typedb');
           resetTracker();
         }}
       />
@@ -625,46 +650,6 @@ export function TransferScreen({ onBack }: TransferScreenProps) {
             <StressScoreDisplay
               signals={realtimeSignals}
               isTyping={isDirectTyping}
-              onPhishingSuspected={(stressScore) => {
-                // 80점 이상: 보이스피싱 의심 거래로 처리
-                console.log('보이스피싱 의심 감지 (스트레스 점수:', stressScore, ')');
-                // 자동으로 분석 결과 생성하여 경고 화면으로 이동
-                if (!riskAnalysis) {
-                  setRiskAnalysis({
-                    riskScore: stressScore,
-                    riskLevel: 'high',
-                    reasons: [
-                      { code: 'STRESS_TOUCH', message: '높은 스트레스 터치 감지', weight: 0.8 },
-                      { code: 'BEHAVIOR_PATTERN', message: '전화 지시에 따른 입력 의심', weight: 0.7 },
-                    ],
-                    extracted: {},
-                    recommendations: [
-                      '전화를 끊고 잠시 생각하세요',
-                      '가족이나 지인에게 상황을 알리세요',
-                      '의심되면 1394로 신고하세요'
-                    ],
-                  });
-                }
-                // 직접 입력 시에도 유사도 80%로 matchResult 설정
-                setMatchResult({
-                  top_match: {
-                    scam_type: '스트레스 터치 감지',
-                    similarity: 0.8, // 80%로 설정
-                    message: '현재 고객님의 거래는 보이스피싱 의심 사례와 80% 유사합니다.',
-                    reasons: ['불안정한 입력 패턴', '전화 지시 의심', '높은 스트레스 터치'],
-                  },
-                  top_cases: [],
-                });
-                // 연락처 임시 설정
-                if (!selectedContact && accountInput) {
-                  setSelectedContact({
-                    name: '확인 필요',
-                    bank: '확인 필요',
-                    account: accountInput,
-                  });
-                }
-                setStep('warning');
-              }}
             />
           )}
 
